@@ -7,9 +7,14 @@ let package = Package(
     .iOS(.v10)
   ],
   products: [
-    .library(name: "SwiftUIKit", targets: ["SwiftUIKit"])
+    .library(name: "SwiftUIKit", targets: ["SwiftUIKit"]),
+    .library(name: "MagazineLayoutHelper", targets: ["MagazineLayoutHelper"])
+  ],
+  dependencies: [
+    .package(url: "https://github.com/airbnb/MagazineLayout", from: "1.6.3")
   ],
   targets: [
-    .target(name: "SwiftUIKit")
+    .target(name: "SwiftUIKit"),
+    .target(name: "MagazineLayoutHelper", dependencies: ["SwiftUIKit", "MagazineLayout"]),
   ]
 )

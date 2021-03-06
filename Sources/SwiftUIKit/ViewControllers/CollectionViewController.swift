@@ -10,6 +10,10 @@ import UIKit
 
 open class CollectionViewController: UIViewController {
 
+  open class var collectionViewLayoutClass: UICollectionViewLayout.Type {
+    return UICollectionViewFlowLayout.self
+  }
+
   open class var collectionViewClass: UICollectionView.Type {
     return UICollectionView.self
   }
@@ -45,12 +49,12 @@ open class CollectionViewController: UIViewController {
   }
 
   public override init(nibName: String? = nil, bundle: Bundle? = nil) {
-    collectionViewLayout = UICollectionViewFlowLayout()
+    collectionViewLayout = Self.collectionViewLayoutClass.init()
     super.init(nibName: nibName, bundle: bundle)
   }
 
   public required init?(coder: NSCoder) {
-    collectionViewLayout = UICollectionViewFlowLayout()
+    collectionViewLayout = Self.collectionViewLayoutClass.init()
     super.init(coder: coder)
   }
 
