@@ -13,7 +13,8 @@ open class SeparatorView: UIView {
 
   open var axis: NSLayoutConstraint.Axis = .horizontal
 
-  @IBInspectable open var thickness: CGFloat = 0 {
+  @IBInspectable
+  open var thickness: CGFloat = 0 {
     didSet {
       invalidateIntrinsicContentSize()
     }
@@ -47,7 +48,8 @@ open class SeparatorView: UIView {
 
 extension SeparatorView {
 
-  @IBInspectable final public var isVertical: Bool {
+  @IBInspectable
+  final public var isVertical: Bool {
     get { axis == .vertical }
     set { axis = newValue ? .vertical : .horizontal }
   }

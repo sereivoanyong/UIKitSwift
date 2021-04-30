@@ -20,7 +20,8 @@ open class Toolbar: UIToolbar {
 
 extension Toolbar {
 
-  @IBInspectable final public var overrideBarPositionRaw: Int {
+  @IBInspectable
+  final public var overrideBarPositionRaw: Int {
     get { overrideBarPosition?.rawValue ?? -1 }
     set { overrideBarPosition = UIBarPosition(rawValue: newValue) }
   }

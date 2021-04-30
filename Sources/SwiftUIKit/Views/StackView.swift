@@ -8,7 +8,7 @@
 
 import UIKit
 
-extension UIStackView {
+extension StackView {
 
   // Raw value is important. Do not change.
   public enum SeparatorInsetReference: Int {
@@ -37,7 +37,8 @@ open class StackView: UIStackView {
     return separatorView
   }
 
-  @IBInspectable open var separatorThickness: CGFloat = 0
+  @IBInspectable
+  open var separatorThickness: CGFloat = 0
 
   open var separatorInset: UIEdgeInsets = .zero
 
@@ -118,7 +119,8 @@ open class StackView: UIStackView {
 
 extension StackView {
 
-  @IBInspectable final public var separatorInsetReferenceRaw: Int {
+  @IBInspectable
+  final public var separatorInsetReferenceRaw: Int {
     get { separatorInsetReference.rawValue }
     set { separatorInsetReference = SeparatorInsetReference(rawValue: newValue) ?? .fromEdges }
   }

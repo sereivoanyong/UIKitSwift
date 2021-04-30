@@ -30,22 +30,26 @@ open class Label: UILabel {
 
 extension Label {
   
-  @IBInspectable final public var topInset: CGFloat {
+  @IBInspectable
+  final public var topInset: CGFloat {
     get { insets.top }
     set { insets.top = newValue }
   }
   
-  @IBInspectable final public var leftInset: CGFloat {
+  @IBInspectable
+  final public var leftInset: CGFloat {
     get { insets.left }
     set { insets.left = newValue }
   }
   
-  @IBInspectable final public var bottomInset: CGFloat {
+  @IBInspectable
+  final public var bottomInset: CGFloat {
     get { insets.bottom }
     set { insets.bottom = newValue }
   }
   
-  @IBInspectable final public var rightInset: CGFloat {
+  @IBInspectable
+  final public var rightInset: CGFloat {
     get { insets.right }
     set { insets.right = newValue }
   }
