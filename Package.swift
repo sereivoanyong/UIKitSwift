@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 import PackageDescription
 
 let package = Package(
@@ -8,10 +8,10 @@ let package = Package(
   ],
   products: [
     .library(name: "SwiftUIKit", targets: ["SwiftUIKit"]),
-    .library(name: "MagazineLayoutHelper", targets: ["MagazineLayoutHelper"])
+    .library(name: "MagazineLayoutHelper", targets: ["MagazineLayoutHelper"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/airbnb/MagazineLayout", from: "1.6.3")
+    .package(url: "https://github.com/airbnb/MagazineLayout", from: "1.6.4"),
   ],
   targets: [
     .target(name: "SwiftUIKit"),
