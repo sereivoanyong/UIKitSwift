@@ -31,7 +31,9 @@ open class CollectionViewController: UIViewController {
     collectionView.preservesSuperviewLayoutMargins = true
     collectionView.delegate = self as? UICollectionViewDelegate
     collectionView.dataSource = self as? UICollectionViewDataSource
-    collectionView.prefetchDataSource = self as? UICollectionViewDataSourcePrefetching
+    if #available(iOS 10.0, *) {
+      collectionView.prefetchDataSource = self as? UICollectionViewDataSourcePrefetching
+    }
     if #available(iOS 11.0, *) {
       collectionView.dragDelegate = self as? UICollectionViewDragDelegate
       collectionView.dropDelegate = self as? UICollectionViewDropDelegate
