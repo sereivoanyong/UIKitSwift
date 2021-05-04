@@ -20,4 +20,11 @@ func class_exchangeInstanceMethodImplementations(_ cls: AnyClass, _ originalSele
   }
 }
 
+@usableFromInline
+func setValueIfNotEqual<Root, Value>(_ value: Value, for keyPath: ReferenceWritableKeyPath<Root, Value>, on object: Root) where Value: Equatable {
+  if object[keyPath: keyPath] != value {
+    object[keyPath: keyPath] = value
+  }
+}
+
 #endif
