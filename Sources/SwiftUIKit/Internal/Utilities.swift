@@ -7,6 +7,7 @@
 #if os(iOS)
 
 import ObjectiveC
+import Foundation
 
 @usableFromInline
 func class_exchangeInstanceMethodImplementations(_ cls: AnyClass, _ originalSelector: Selector, _ swizzledSelector: Selector) {
@@ -24,6 +25,28 @@ func class_exchangeInstanceMethodImplementations(_ cls: AnyClass, _ originalSele
 func setValueIfNotEqual<Root, Value>(_ value: Value, for keyPath: ReferenceWritableKeyPath<Root, Value>, on object: Root) where Value: Equatable {
   if object[keyPath: keyPath] != value {
     object[keyPath: keyPath] = value
+  }
+}
+
+extension NSObjectProtocol where Self: NSObject {
+
+  func bind<Target, Value>(_ keyPath: KeyPath<Self, Value>, to target: Target, at targetKeyPath: ReferenceWritableKeyPath<Target, Value>) -> NSKeyValueObservation {
+    return observe(keyPath, options: [.initial, .new]) { source, _ in
+      target[keyPath: targetKeyPath] = source[keyPath: keyPath]
+    }
+  }
+
+  func bind<Value>(_ keyPath: ReferenceWritableKeyPath<Self, Value>, to target: Self) -> NSKeyValueObservation {
+    return observe(keyPath, options: [.initial, .new]) { source, _ in
+      target[keyPath: keyPath] = source[keyPath: keyPath]
+    }
+  }
+}
+
+extension NSKeyValueObservation {
+
+  final func store<C>(in collection: inout C) where C: RangeReplaceableCollection, C.Element == NSKeyValueObservation {
+    collection.append(self)
   }
 }
 

@@ -8,107 +8,101 @@
 
 import UIKit
 
-// Inspired by https://github.com/devxoul/UITextView-Placeholder
-
 @IBDesignable
 open class TextView: UITextView {
 
-  private var needsUpdateFont: Bool = false
-  private var isPlaceholderTextViewLoaded: Bool = false
-  private let keyPathsToObserve: [String] = [
-    "attributedText", "bounds", "font", "frame", "text", "textAlignment", "textContainerInset",
-    "textContainer.layoutManager.usesFontLeading", "textContainer.lineFragmentPadding", "textContainer.exclusionPaths"
-  ]
-
-  public static let defaultPlaceholderColor: UIColor = {
-    if #available(iOS 13.0, *) {
-      return .placeholderText
-    } else {
-      let textField = UITextField()
-      textField.placeholder = " "
-      return textField.attributedPlaceholder?.attributes(at: 0, effectiveRange: nil)[.foregroundColor] as? UIColor ?? UIColor(red: 0, green: 0, blue: 0.0980392, alpha: 0.22)
+  private var cachedFont: UIFont!
+  open override var font: UIFont! {
+    get {
+      if let font = super.font {
+        return font
+      }
+      if cachedFont == nil {
+        let textBefore = text
+        text = " "
+        let font = super.font
+        text = textBefore
+        cachedFont = font
+      }
+      return cachedFont
     }
-  }()
+    set { super.font = newValue }
+  }
 
+  private var placeholderTextViewBindings: [NSKeyValueObservation] = []
+
+  private var _placeholderTextView: UITextView?
   lazy open private(set) var placeholderTextView: UITextView = {
-    isPlaceholderTextViewLoaded = true
-    let originalText = attributedText
-    text = " " // lazily set font of `UITextView`.
-    attributedText = originalText
-
-    let textView = UITextView(frame: bounds)
+    let textView = UITextView()
     textView.backgroundColor = .clear
-    textView.font = font
-    textView.textAlignment = textAlignment
-    textView.textColor = type(of: self).defaultPlaceholderColor
+    if #available(iOS 13.0, *) {
+      textView.textColor = .placeholderText
+    } else {
+      // See: https://stackoverflow.com/a/43346157/11235826
+      textView.textColor = UIColor(red: 0, green: 0, blue: 0.0980392, alpha: 0.22)
+    }
     textView.isUserInteractionEnabled = false
     textView.isAccessibilityElement = false
     textView.showsHorizontalScrollIndicator = false
     textView.showsVerticalScrollIndicator = false
-    textView.textContainerInset = textContainerInset
-    textView.textContainer.exclusionPaths = textContainer.exclusionPaths
-    textView.textContainer.lineFragmentPadding = textContainer.lineFragmentPadding
-    textView.textContainer.layoutManager!.usesFontLeading = textContainer.layoutManager!.usesFontLeading
+
+    let `self`: UITextView = self
+    self.bind(\.bounds, to: textView, at: \.frame).store(in: &placeholderTextViewBindings)
+    self.bind(\.font, to: textView).store(in: &placeholderTextViewBindings)
+    self.bind(\.textAlignment, to: textView).store(in: &placeholderTextViewBindings)
+    self.bind(\.textContainer.layoutManager!.usesFontLeading, to: textView).store(in: &placeholderTextViewBindings)
+    self.bind(\.textContainer.exclusionPaths, to: textView).store(in: &placeholderTextViewBindings)
+    self.bind(\.textContainer.lineFragmentPadding, to: textView).store(in: &placeholderTextViewBindings)
+    self.bind(\.textContainerInset, to: textView).store(in: &placeholderTextViewBindings)
+
     NotificationCenter.default.addObserver(self, selector: #selector(updatePlaceholderTextView), name: UITextView.textDidChangeNotification, object: self)
 
-    for keyPath in keyPathsToObserve {
-      addObserver(self, forKeyPath: keyPath, options: .new, context: nil)
+    if text.isEmpty {
+      insertSubview(textView, at: 0)
     }
+    _placeholderTextView = textView
     return textView
   }()
 
   @IBInspectable
-  final public var placeholder: String? {
-    get { return placeholderTextView.text }
-    set { placeholderTextView.text = newValue; updatePlaceholderTextView() }
+  open var placeholder: String? {
+    get { placeholderTextView.text }
+    set { placeholderTextView.text = newValue }
   }
 
   open var attributedPlaceholder: NSAttributedString? {
-    get { return placeholderTextView.attributedText }
-    set { placeholderTextView.attributedText = newValue; updatePlaceholderTextView() }
+    get { placeholderTextView.attributedText }
+    set { placeholderTextView.attributedText = newValue }
   }
 
   @IBInspectable
-  final public var placeholderColor: UIColor? {
-    get { return placeholderTextView.textColor }
+  open var placeholderColor: UIColor? {
+    get { placeholderTextView.textColor }
     set { placeholderTextView.textColor = newValue }
   }
 
-  deinit {
-    NotificationCenter.default.removeObserver(self, name: UITextView.textDidChangeNotification, object: self)
-    if isPlaceholderTextViewLoaded {
-      for keyPath in keyPathsToObserve {
-        removeObserver(self, forKeyPath: keyPath, context: nil)
-      }
+  @IBInspectable
+  open var minimumNumberOfLinesToDisplay: Int = 0 {
+    didSet {
+      invalidateIntrinsicContentSize()
     }
   }
 
-  open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-    if keyPath == "font" {
-      needsUpdateFont = change?[.newKey] != nil
+  open override var intrinsicContentSize: CGSize {
+    var intrinsicContentSize = super.intrinsicContentSize
+    if minimumNumberOfLinesToDisplay > 0 {
+      let minimumHeight = textContainerInset.top + textContainerInset.bottom + font!.lineHeight * CGFloat(minimumNumberOfLinesToDisplay)
+      intrinsicContentSize.height = max(minimumHeight, intrinsicContentSize.height)
     }
-    updatePlaceholderTextView()
+    return intrinsicContentSize
   }
 
   @objc private func updatePlaceholderTextView() {
-    if !text.isEmpty {
-      placeholderTextView.removeFromSuperview()
-    } else {
+    if text.isEmpty {
       insertSubview(placeholderTextView, at: 0)
+    } else {
+      placeholderTextView.removeFromSuperview()
     }
-
-    if needsUpdateFont {
-      placeholderTextView.font = font
-      needsUpdateFont = false
-    }
-    if placeholderTextView.attributedText.length == 0 {
-      placeholderTextView.textAlignment = textAlignment
-    }
-    placeholderTextView.textContainerInset = textContainerInset
-    placeholderTextView.textContainer.layoutManager!.usesFontLeading = textContainer.layoutManager!.usesFontLeading
-    placeholderTextView.textContainer.exclusionPaths = textContainer.exclusionPaths
-    placeholderTextView.textContainer.lineFragmentPadding = textContainer.lineFragmentPadding
-    placeholderTextView.frame = bounds
   }
 }
 
