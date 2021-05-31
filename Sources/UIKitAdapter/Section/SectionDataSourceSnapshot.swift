@@ -12,6 +12,14 @@ public struct SectionDataSourceSnapshot<SectionIdentifierType, ItemIdentifierTyp
 
   var sections: ContiguousArray<Section<SectionIdentifierType, ItemIdentifierType>> = []
 
+  public init() {
+    
+  }
+
+  public init(section sectionIdentifier: SectionIdentifierType, items itemIdentifiers: [ItemIdentifierType]) {
+    appendSection(sectionIdentifier, items: itemIdentifiers)
+  }
+
   public var numberOfSections: Int {
     sections.count
   }

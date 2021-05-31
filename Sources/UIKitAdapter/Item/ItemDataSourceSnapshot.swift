@@ -12,7 +12,7 @@ public struct ItemDataSourceSnapshot<ItemIdentifierType> {
 
   var items: ContiguousArray<Item<ItemIdentifierType>>
 
-  public init(_ itemIdentifiers: [ItemIdentifierType] = []) {
+  public init(items itemIdentifiers: [ItemIdentifierType] = []) {
     self.items = ContiguousArray(itemIdentifiers.lazy.map(Item.init))
   }
 
