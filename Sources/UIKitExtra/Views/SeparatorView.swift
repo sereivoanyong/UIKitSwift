@@ -11,8 +11,17 @@ import UIKit
 @IBDesignable
 open class SeparatorView: UIView {
 
+  public static var backgroundColor: UIColor?
+
   open var axis: NSLayoutConstraint.Axis = .horizontal
 
+  // Set to nil to use default.
+  open override var backgroundColor: UIColor! {
+    get { super.backgroundColor }
+    set { super.backgroundColor = newValue ?? SeparatorView.defaultBackgroundColor() }
+  }
+
+  // 0 means pixel (1 / display scale)
   @IBInspectable
   open var thickness: CGFloat = 0 {
     didSet {
@@ -22,18 +31,32 @@ open class SeparatorView: UIView {
 
   public override init(frame: CGRect = .zero) {
     super.init(frame: frame)
-
     #if !TARGET_INTERFACE_BUILDER
-    if #available(iOS 13.0, *) {
-      backgroundColor = .separator
-    } else {
-      backgroundColor = UIColor(red: 0.23529411764705882, green: 0.23529411764705882, blue: 0.2627450980392157, alpha: 0.29)
-    }
+    commonInit()
     #endif
   }
 
   public required init?(coder: NSCoder) {
     super.init(coder: coder)
+    commonInit()
+  }
+
+  private func commonInit() {
+    // Check if values are not set by interface builder
+    if backgroundColor == nil {
+      backgroundColor = SeparatorView.defaultBackgroundColor()
+    }
+    if contentHuggingPriority(for: .horizontal) == .defaultLow {
+      setContentHuggingPriority(.defaultHigh, for: .horizontal)
+    }
+    if contentHuggingPriority(for: .vertical) == .defaultLow {
+      setContentHuggingPriority(.defaultHigh, for: .vertical)
+    }
+  }
+
+  open override func prepareForInterfaceBuilder() {
+    super.prepareForInterfaceBuilder()
+    commonInit()
   }
 
   open override var intrinsicContentSize: CGSize {
@@ -42,6 +65,18 @@ open class SeparatorView: UIView {
       return CGSize(width: thickness > 0 ? thickness : (1 / traitCollection.displayScale), height: UIView.noIntrinsicMetric)
     default:
       return CGSize(width: UIView.noIntrinsicMetric, height: thickness > 0 ? thickness : (1 / traitCollection.displayScale))
+    }
+  }
+
+  private static func defaultBackgroundColor() -> UIColor {
+    if let backgroundColor = SeparatorView.backgroundColor {
+      return backgroundColor
+    } else {
+      if #available(iOS 13.0, *) {
+        return .separator
+      } else {
+        return UIColor(red: 60/255.0, green: 60/255.0, blue: 67/255.0, alpha: 0.29)
+      }
     }
   }
 }
