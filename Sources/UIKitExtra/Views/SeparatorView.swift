@@ -13,6 +13,7 @@ open class SeparatorView: UIView {
 
   public static var backgroundColor: UIColor?
 
+  // Axis is not marked as frozen. Instead, `isVertical` is widely used.
   open var axis: NSLayoutConstraint.Axis = .horizontal
 
   // Set to nil to use default.
@@ -60,10 +61,9 @@ open class SeparatorView: UIView {
   }
 
   open override var intrinsicContentSize: CGSize {
-    switch axis {
-    case .vertical:
+    if isVertical {
       return CGSize(width: thickness > 0 ? thickness : (1 / traitCollection.displayScale), height: UIView.noIntrinsicMetric)
-    default:
+    } else {
       return CGSize(width: UIView.noIntrinsicMetric, height: thickness > 0 ? thickness : (1 / traitCollection.displayScale))
     }
   }
