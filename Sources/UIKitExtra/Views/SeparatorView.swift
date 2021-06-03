@@ -46,11 +46,11 @@ open class SeparatorView: UIView {
     if backgroundColor == nil {
       backgroundColor = SeparatorView.defaultBackgroundColor()
     }
-    if contentHuggingPriority(for: .horizontal) == .defaultLow {
-      setContentHuggingPriority(.defaultHigh, for: .horizontal)
+    if contentCompressionResistancePriority(for: .horizontal) == .defaultHigh {
+      setContentCompressionResistancePriority(.defaultHigh + 1, for: .horizontal)
     }
-    if contentHuggingPriority(for: .vertical) == .defaultLow {
-      setContentHuggingPriority(.defaultHigh, for: .vertical)
+    if contentCompressionResistancePriority(for: .vertical) == .defaultHigh {
+      setContentCompressionResistancePriority(.defaultHigh + 1, for: .vertical)
     }
   }
 
