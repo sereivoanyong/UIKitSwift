@@ -59,4 +59,22 @@ extension DirectionalEdges: Hashable where DirectionalXAxisItem: Hashable, YAxis
 extension DirectionalEdges: Decodable where DirectionalXAxisItem: Decodable, YAxisItem: Decodable { }
 extension DirectionalEdges: Encodable where DirectionalXAxisItem: Encodable, YAxisItem: Encodable { }
 
+extension DirectionalEdges: AdditiveArithmetic where DirectionalXAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
+
+  @inlinable
+  public static var zero: Self {
+    .init(top: .zero, leading: .zero, bottom: .zero, trailing: .zero)
+  }
+
+  @inlinable
+  public static func + (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top + rhs.top, leading: lhs.leading + rhs.leading, bottom: lhs.bottom + rhs.bottom, trailing: lhs.trailing + rhs.trailing)
+  }
+
+  @inlinable
+  public static func - (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top - rhs.top, leading: lhs.leading - rhs.leading, bottom: lhs.bottom - rhs.bottom, trailing: lhs.trailing - rhs.trailing)
+  }
+}
+
 #endif
