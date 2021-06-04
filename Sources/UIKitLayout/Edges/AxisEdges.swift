@@ -32,6 +32,24 @@ extension DirectionalXAxisEdges: Hashable where DirectionalXAxisItem: Hashable {
 extension DirectionalXAxisEdges: Decodable where DirectionalXAxisItem: Decodable { }
 extension DirectionalXAxisEdges: Encodable where DirectionalXAxisItem: Encodable { }
 
+extension DirectionalXAxisEdges: AdditiveArithmetic where DirectionalXAxisItem: AdditiveArithmetic {
+
+  @inlinable
+  public static var zero: Self {
+    .init(leading: .zero, trailing: .zero)
+  }
+
+  @inlinable
+  public static func + (lhs: Self, rhs: Self) -> Self {
+    .init(leading: lhs.leading + rhs.leading, trailing: lhs.trailing + rhs.trailing)
+  }
+
+  @inlinable
+  public static func - (lhs: Self, rhs: Self) -> Self {
+    .init(leading: lhs.leading - rhs.leading, trailing: lhs.trailing - rhs.trailing)
+  }
+}
+
 // MARK: X Axis Edges
 
 public protocol XAxisEdgesProtocol {
@@ -56,6 +74,24 @@ extension XAxisEdges: Hashable where Item: Hashable { }
 extension XAxisEdges: Decodable where Item: Decodable { }
 extension XAxisEdges: Encodable where Item: Encodable { }
 
+extension XAxisEdges: AdditiveArithmetic where Item: AdditiveArithmetic {
+
+  @inlinable
+  public static var zero: Self {
+    .init(left: .zero, right: .zero)
+  }
+
+  @inlinable
+  public static func + (lhs: Self, rhs: Self) -> Self {
+    .init(left: lhs.left + rhs.left, right: lhs.right + rhs.right)
+  }
+
+  @inlinable
+  public static func - (lhs: Self, rhs: Self) -> Self {
+    .init(left: lhs.left - rhs.left, right: lhs.right - rhs.right)
+  }
+}
+
 // MARK: Y Axis Edges
 
 public protocol YAxisEdgesProtocol {
@@ -79,5 +115,23 @@ extension YAxisEdges: Equatable where Item: Equatable { }
 extension YAxisEdges: Hashable where Item: Hashable { }
 extension YAxisEdges: Decodable where Item: Decodable { }
 extension YAxisEdges: Encodable where Item: Encodable { }
+
+extension YAxisEdges: AdditiveArithmetic where Item: AdditiveArithmetic {
+
+  @inlinable
+  public static var zero: Self {
+    .init(top: .zero, bottom: .zero)
+  }
+
+  @inlinable
+  public static func + (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top + rhs.top, bottom: lhs.bottom + rhs.bottom)
+  }
+
+  @inlinable
+  public static func - (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top - rhs.top, bottom: lhs.bottom - rhs.bottom)
+  }
+}
 
 #endif
