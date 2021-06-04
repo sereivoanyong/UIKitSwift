@@ -43,6 +43,9 @@ extension DirectionalEdgesProtocol where DirectionalXAxisItem == NSLayoutConstra
 @available(iOS 11.0, *)
 extension NSDirectionalEdgeInsets: DirectionalEdgesProtocol { }
 
+@available(iOS 11.0, *)
+extension NSDirectionalEdgeInsets: AdditiveArithmetic { }
+
 // MARK: Edges
 
 public typealias EdgeInsets = Edges<CGFloat, CGFloat>
@@ -56,5 +59,6 @@ extension EdgesProtocol where XAxisItem == NSLayoutConstraint, YAxisItem == NSLa
 }
 
 extension UIEdgeInsets: EdgesProtocol { }
+extension UIEdgeInsets: AdditiveArithmetic { }
 
 #endif

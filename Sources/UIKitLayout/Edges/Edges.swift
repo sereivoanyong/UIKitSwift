@@ -39,6 +39,24 @@ extension EdgesProtocol {
   }
 }
 
+extension EdgesProtocol where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
+
+  @inlinable
+  public static var zero: Self {
+    .init(top: .zero, left: .zero, bottom: .zero, right: .zero)
+  }
+
+  @inlinable
+  public static func + (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top + rhs.top, left: lhs.left + rhs.left, bottom: lhs.bottom + rhs.bottom, right: lhs.right + rhs.right)
+  }
+
+  @inlinable
+  public static func - (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top - rhs.top, left: lhs.left - rhs.left, bottom: lhs.bottom - rhs.bottom, right: lhs.right - rhs.right)
+  }
+}
+
 public struct Edges<XAxisItem, YAxisItem>: EdgesProtocol {
 
   public var top: YAxisItem
@@ -58,23 +76,6 @@ extension Edges: Equatable where XAxisItem: Equatable, YAxisItem: Equatable { }
 extension Edges: Hashable where XAxisItem: Hashable, YAxisItem: Hashable { }
 extension Edges: Decodable where XAxisItem: Decodable, YAxisItem: Decodable { }
 extension Edges: Encodable where XAxisItem: Encodable, YAxisItem: Encodable { }
-
-extension Edges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
-
-  @inlinable
-  public static var zero: Self {
-    .init(top: .zero, left: .zero, bottom: .zero, right: .zero)
-  }
-
-  @inlinable
-  public static func + (lhs: Self, rhs: Self) -> Self {
-    .init(top: lhs.top + rhs.top, left: lhs.left + rhs.left, bottom: lhs.bottom + rhs.bottom, right: lhs.right + rhs.right)
-  }
-
-  @inlinable
-  public static func - (lhs: Self, rhs: Self) -> Self {
-    .init(top: lhs.top - rhs.top, left: lhs.left - rhs.left, bottom: lhs.bottom - rhs.bottom, right: lhs.right - rhs.right)
-  }
-}
+extension Edges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic { }
 
 #endif

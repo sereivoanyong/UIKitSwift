@@ -39,6 +39,24 @@ extension DirectionalEdgesProtocol {
   }
 }
 
+extension DirectionalEdgesProtocol where DirectionalXAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
+
+  @inlinable
+  public static var zero: Self {
+    .init(top: .zero, leading: .zero, bottom: .zero, trailing: .zero)
+  }
+
+  @inlinable
+  public static func + (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top + rhs.top, leading: lhs.leading + rhs.leading, bottom: lhs.bottom + rhs.bottom, trailing: lhs.trailing + rhs.trailing)
+  }
+
+  @inlinable
+  public static func - (lhs: Self, rhs: Self) -> Self {
+    .init(top: lhs.top - rhs.top, leading: lhs.leading - rhs.leading, bottom: lhs.bottom - rhs.bottom, trailing: lhs.trailing - rhs.trailing)
+  }
+}
+
 public struct DirectionalEdges<DirectionalXAxisItem, YAxisItem>: DirectionalEdgesProtocol {
 
   public var top: YAxisItem
@@ -58,23 +76,6 @@ extension DirectionalEdges: Equatable where DirectionalXAxisItem: Equatable, YAx
 extension DirectionalEdges: Hashable where DirectionalXAxisItem: Hashable, YAxisItem: Hashable { }
 extension DirectionalEdges: Decodable where DirectionalXAxisItem: Decodable, YAxisItem: Decodable { }
 extension DirectionalEdges: Encodable where DirectionalXAxisItem: Encodable, YAxisItem: Encodable { }
-
-extension DirectionalEdges: AdditiveArithmetic where DirectionalXAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
-
-  @inlinable
-  public static var zero: Self {
-    .init(top: .zero, leading: .zero, bottom: .zero, trailing: .zero)
-  }
-
-  @inlinable
-  public static func + (lhs: Self, rhs: Self) -> Self {
-    .init(top: lhs.top + rhs.top, leading: lhs.leading + rhs.leading, bottom: lhs.bottom + rhs.bottom, trailing: lhs.trailing + rhs.trailing)
-  }
-
-  @inlinable
-  public static func - (lhs: Self, rhs: Self) -> Self {
-    .init(top: lhs.top - rhs.top, leading: lhs.leading - rhs.leading, bottom: lhs.bottom - rhs.bottom, trailing: lhs.trailing - rhs.trailing)
-  }
-}
+extension DirectionalEdges: AdditiveArithmetic where DirectionalXAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic { }
 
 #endif
