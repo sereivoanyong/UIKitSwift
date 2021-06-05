@@ -15,6 +15,8 @@ let package = Package(
     .library(name: "UIKitLayout", targets: ["UIKitLayout"]),
 
     .library(name: "UIKitExtra", targets: ["UIKitExtra"]),
+
+    .library(name: "CollectionViewWaterfallLayout", targets: ["CollectionViewWaterfallLayout"]),
   ],
   dependencies: [
     .package(url: "https://github.com/tungvoduc/DTPhotoViewerController", from: "3.1.1"),
@@ -29,5 +31,7 @@ let package = Package(
     .target(name: "UIKitLayout"),
 
     .target(name: "UIKitExtra"),
+
+    .target(name: "CollectionViewWaterfallLayout"),
   ]
 )
