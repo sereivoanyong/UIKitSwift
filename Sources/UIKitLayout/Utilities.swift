@@ -28,6 +28,12 @@ extension UILayoutPriority: ExpressibleByIntegerLiteral {
   }
 }
 
+// MARK: Axis Edges
+
+public typealias DirectionalXAxisEdgeInsets = DirectionalXAxisEdges<CGFloat>
+public typealias XAxisEdgeInsets = XAxisEdges<CGFloat>
+public typealias YAxisEdgeInsets = YAxisEdges<CGFloat>
+
 // MARK: Directional Edges
 
 public typealias DirectionalEdgeInsets = DirectionalEdges<CGFloat, CGFloat>

@@ -15,6 +15,12 @@ public protocol EdgesProtocol: XAxisEdgesProtocol, YAxisEdgesProtocol {
 
 extension EdgesProtocol {
 
+  init<XAxisEdges: XAxisEdgesProtocol, YAxisEdges: YAxisEdgesProtocol>(
+    horizontal: XAxisEdges, vertical: YAxisEdges
+  ) where XAxisEdges.XAxisItem == XAxisItem, YAxisEdges.YAxisItem == YAxisItem {
+    self.init(top: vertical.top, left: horizontal.left, bottom: vertical.bottom, right: horizontal.right)
+  }
+
   /// `let insets = Edges<NSLayoutConstraint>(...).map { $0.constant }`
   public func map<Item, T>(_ transform: (Item) -> T) -> Edges<T, T> where Item == XAxisItem, Item == YAxisItem {
     .init(top: transform(top), left: transform(left), bottom: transform(bottom), right: transform(right))

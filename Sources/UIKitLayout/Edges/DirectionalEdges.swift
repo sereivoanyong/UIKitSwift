@@ -15,6 +15,12 @@ public protocol DirectionalEdgesProtocol: DirectionalXAxisEdgesProtocol, YAxisEd
 
 extension DirectionalEdgesProtocol {
 
+  init<DirectionalXAxisEdges: DirectionalXAxisEdgesProtocol, YAxisEdges: YAxisEdgesProtocol>(
+    horizontal: DirectionalXAxisEdges, vertical: YAxisEdges
+  ) where DirectionalXAxisEdges.DirectionalXAxisItem == DirectionalXAxisItem, YAxisEdges.YAxisItem == YAxisItem {
+    self.init(top: vertical.top, leading: horizontal.leading, bottom: vertical.bottom, trailing: horizontal.trailing)
+  }
+
   /// `let insets = DirectionalEdges<NSLayoutConstraint>(...).map { $0.constant }`
   public func map<Item, T>(_ transform: (Item) -> T) -> DirectionalEdges<T, T> where Item == DirectionalXAxisItem, Item == YAxisItem {
     .init(top: transform(top), leading: transform(leading), bottom: transform(bottom), trailing: transform(trailing))
