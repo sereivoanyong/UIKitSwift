@@ -15,7 +15,14 @@ public protocol YAxisEdgesProtocol {
   var bottom: YAxisItem { get set }
 }
 
-public struct YAxisEdges<Item> {
+extension YAxisEdgesProtocol where YAxisItem: AdditiveArithmetic {
+
+  public var vertical: YAxisItem {
+    top + bottom
+  }
+}
+
+public struct YAxisEdges<Item>: YAxisEdgesProtocol {
 
   public var top, bottom: Item
 

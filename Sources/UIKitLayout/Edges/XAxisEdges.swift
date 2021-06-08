@@ -15,6 +15,13 @@ public protocol XAxisEdgesProtocol {
   var right: XAxisItem { get set }
 }
 
+extension XAxisEdgesProtocol where XAxisItem: AdditiveArithmetic {
+
+  public var horizontal: XAxisItem {
+    left + right
+  }
+}
+
 public struct XAxisEdges<Item>: XAxisEdgesProtocol {
 
   public var left, right: Item

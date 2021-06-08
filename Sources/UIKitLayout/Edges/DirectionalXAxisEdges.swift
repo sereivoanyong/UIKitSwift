@@ -15,6 +15,13 @@ public protocol DirectionalXAxisEdgesProtocol {
   var trailing: DirectionalXAxisItem { get set }
 }
 
+extension DirectionalXAxisEdgesProtocol where DirectionalXAxisItem: AdditiveArithmetic {
+
+  public var horizontal: DirectionalXAxisItem {
+    leading + trailing
+  }
+}
+
 public struct DirectionalXAxisEdges<DirectionalXAxisItem>: DirectionalXAxisEdgesProtocol {
 
   public var leading, trailing: DirectionalXAxisItem
