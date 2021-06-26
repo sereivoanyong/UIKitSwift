@@ -31,13 +31,13 @@ func setValueIfNotEqual<Root, Value>(_ value: Value, for keyPath: ReferenceWrita
 extension NSObjectProtocol where Self: NSObject {
 
   func bind<Target, Value>(_ keyPath: KeyPath<Self, Value>, to target: Target, at targetKeyPath: ReferenceWritableKeyPath<Target, Value>) -> NSKeyValueObservation {
-    return observe(keyPath, options: [.initial, .new]) { source, _ in
+    observe(keyPath, options: [.initial, .new]) { source, _ in
       target[keyPath: targetKeyPath] = source[keyPath: keyPath]
     }
   }
 
   func bind<Value>(_ keyPath: ReferenceWritableKeyPath<Self, Value>, to target: Self) -> NSKeyValueObservation {
-    return observe(keyPath, options: [.initial, .new]) { source, _ in
+    observe(keyPath, options: [.initial, .new]) { source, _ in
       target[keyPath: keyPath] = source[keyPath: keyPath]
     }
   }
@@ -47,6 +47,27 @@ extension NSKeyValueObservation {
 
   final func store<C>(in collection: inout C) where C: RangeReplaceableCollection, C.Element == NSKeyValueObservation {
     collection.append(self)
+  }
+}
+
+extension Optional {
+
+  @discardableResult
+  func assignIfNonNil<Root>(to keyPath: ReferenceWritableKeyPath<Root, Wrapped>, on object: Root) -> Bool {
+    if let value = self {
+      object[keyPath: keyPath] = value
+      return true
+    }
+    return false
+  }
+
+  @discardableResult
+  func assignIfNonNil<Root>(to keyPath: ReferenceWritableKeyPath<Root, Wrapped?>, on object: Root) -> Bool {
+    if let value = self {
+      object[keyPath: keyPath] = value
+      return true
+    }
+    return false
   }
 }
 

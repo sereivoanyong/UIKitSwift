@@ -31,6 +31,7 @@ let package = Package(
     .target(name: "UIKitLayout"),
 
     .target(name: "UIKitExtra"),
+    .testTarget(name: "UIKitExtraTests", dependencies: ["UIKitExtra"]),
 
     .target(name: "CollectionViewWaterfallLayout"),
   ]
