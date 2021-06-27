@@ -42,8 +42,6 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
     }
   }
 
-  open var changeHandler: ((Item?) -> Void)?
-
   private func select(_ selectedItem: Item?, updateSource: Bool, sendValueChangedActions: Bool) {
     willChangeValue(forKey: "selectedItem")
     if selectedItem != _selectedItem {
@@ -65,7 +63,6 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
       if sendValueChangedActions {
         sendActions(for: .valueChanged)
         NotificationCenter.default.post(name: Self.selectedItemDidChangeNotification, object: self)
-        changeHandler?(selectedItem)
       }
     }
     didChangeValue(forKey: "selectedItem")
@@ -91,10 +88,17 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
     source = .presentation(handler: handler)
   }
 
+  open override var canBecomeFirstResponder: Bool {
+    if case .presentation = source {
+      return false
+    }
+    return super.canBecomeFirstResponder // `UIKit` will call `textFieldShouldBeginEditing(_:)` here
+  }
+
   @discardableResult
   open override func becomeFirstResponder() -> Bool {
     let become = super.becomeFirstResponder()
-    if become, let source = source {
+    if let source = source {
       switch source {
       case .pickerView(let pickerView, let adapter):
         if let selectedItem = selectedItem {
@@ -110,20 +114,14 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
         }
 
       case .presentation(let handler):
-        defer {
-          /// `becomeFirstResponder` is not reliable because it is called more than once on iOS 14 causing multiple view controllers to present
-          /// So we will keep weak reference to presenting view controller & invoke the handler only if it is not nil as a workaround
-
-          /// Resign first responder immediately. Otherwise, first responder will be restored after the presenting view controller is dismissed
-          resignFirstResponder()
-          if _presentingViewController == nil {
-            _presentingViewController = handler(selectedItem, { [unowned self] item in
-              select(item, updateSource: false, sendValueChangedActions: true)
-            })
-          }
+        // It seems like `UIKit` retries to becomeFirstResponder after the function returns false.
+        // So we keep weak reference to presenting view controller & invoke the handler only if it is not nil
+        if _presentingViewController == nil {
+          UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
+          _presentingViewController = handler(selectedItem, { [unowned self] item in
+            select(item, updateSource: false, sendValueChangedActions: true)
+          })
         }
-        /// Return `true` to take first responder from previous view
-        return become
       }
     }
     return become
@@ -136,11 +134,16 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
 
 extension PickerTextField {
 
-  public convenience init(selectedItem: Item? = nil, placeholder: String? = nil, font: UIFont? = nil, textAlignment: NSTextAlignment = .left, textColor: UIColor? = nil) {
+  public convenience init(selectedItem: Item? = nil, placeholder: String? = nil, font: UIFont? = nil, textAlignment: NSTextAlignment = .natural, textColor: UIColor? = nil) {
     self.init()
     self.font = font
     self.textAlignment = textAlignment
-    self.textColor = textColor
+      // On iOS 13, default text color is `.label`. When Set to nil, it becomes `.black`
+    if #available(iOS 13.0, *) {
+      self.textColor = textColor ?? .label
+    } else {
+      self.textColor = textColor
+    }
     self.placeholder = placeholder
     self.selectedItem = selectedItem
   }
