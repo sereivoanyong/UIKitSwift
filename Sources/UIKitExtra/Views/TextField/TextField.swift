@@ -86,10 +86,6 @@ open class TextField: UITextField {
     adjustedTextRect(forTextRect: super.textRect(forBounds: bounds), forEditing: false)
   }
 
-  open override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
-    adjustedTextRect(forTextRect: super.placeholderRect(forBounds: bounds), forEditing: false)
-  }
-
   open override func editingRect(forBounds bounds: CGRect) -> CGRect {
     adjustedTextRect(forTextRect: super.editingRect(forBounds: bounds), forEditing: true)
   }
