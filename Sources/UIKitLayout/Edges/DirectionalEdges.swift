@@ -39,10 +39,6 @@ extension DirectionalEdgesProtocol {
     set(&bottom, newEdges.bottom)
     set(&trailing, newEdges.trailing)
   }
-
-  func array<Item>() -> [Item] where Item == DirectionalXAxisItem, Item == YAxisItem {
-    [top, leading, bottom, trailing]
-  }
 }
 
 extension DirectionalEdgesProtocol where DirectionalXAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
@@ -75,6 +71,14 @@ public struct DirectionalEdges<DirectionalXAxisItem, YAxisItem>: DirectionalEdge
     self.leading = leading
     self.bottom = bottom
     self.trailing = trailing
+  }
+}
+
+extension DirectionalEdges where DirectionalXAxisItem == YAxisItem {
+
+  @inlinable
+  public var all: [DirectionalXAxisItem] {
+    [top, leading, bottom, trailing]
   }
 }
 

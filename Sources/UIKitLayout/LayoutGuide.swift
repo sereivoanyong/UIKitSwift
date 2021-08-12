@@ -24,25 +24,6 @@ public protocol LayoutGuide: AnyObject {
   var superLayoutGuide: LayoutGuide? { get }
 }
 
-extension LayoutGuide {
-
-  public var directionalXAxisEdgeAnchors: DirectionalXAxisEdges<NSLayoutXAxisAnchor> {
-    .init(leading: leadingAnchor, trailing: trailingAnchor)
-  }
-
-  public var xAxisEdgeAnchors: XAxisEdges<NSLayoutXAxisAnchor> {
-    .init(left: leftAnchor, right: rightAnchor)
-  }
-
-  public var yAxisEdgeAnchors: YAxisEdges<NSLayoutYAxisAnchor> {
-    .init(top: topAnchor, bottom: bottomAnchor)
-  }
-
-  public var edgeAnchors: Edges<NSLayoutXAxisAnchor, NSLayoutYAxisAnchor> {
-    .init(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor)
-  }
-}
-
 extension UIView: LayoutGuide {
 
   public var superLayoutGuide: LayoutGuide? {

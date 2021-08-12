@@ -30,6 +30,11 @@ public struct DirectionalXAxisEdges<DirectionalXAxisItem>: DirectionalXAxisEdges
     self.leading = leading
     self.trailing = trailing
   }
+
+  @inlinable
+  public var all: [DirectionalXAxisItem] {
+    [leading, trailing]
+  }
 }
 
 extension DirectionalXAxisEdges: Equatable where DirectionalXAxisItem: Equatable { }

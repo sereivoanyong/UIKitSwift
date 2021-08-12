@@ -22,22 +22,27 @@ extension YAxisEdgesProtocol where YAxisItem: AdditiveArithmetic {
   }
 }
 
-public struct YAxisEdges<Item>: YAxisEdgesProtocol {
+public struct YAxisEdges<YAxisItem>: YAxisEdgesProtocol {
 
-  public var top, bottom: Item
+  public var top, bottom: YAxisItem
 
-  public init(top: Item, bottom: Item) {
+  public init(top: YAxisItem, bottom: YAxisItem) {
     self.top = top
     self.bottom = bottom
   }
+
+  @inlinable
+  public var all: [YAxisItem] {
+    [top, bottom]
+  }
 }
 
-extension YAxisEdges: Equatable where Item: Equatable { }
-extension YAxisEdges: Hashable where Item: Hashable { }
-extension YAxisEdges: Decodable where Item: Decodable { }
-extension YAxisEdges: Encodable where Item: Encodable { }
+extension YAxisEdges: Equatable where YAxisItem: Equatable { }
+extension YAxisEdges: Hashable where YAxisItem: Hashable { }
+extension YAxisEdges: Decodable where YAxisItem: Decodable { }
+extension YAxisEdges: Encodable where YAxisItem: Encodable { }
 
-extension YAxisEdges: AdditiveArithmetic where Item: AdditiveArithmetic {
+extension YAxisEdges: AdditiveArithmetic where YAxisItem: AdditiveArithmetic {
 
   @inlinable
   public static var zero: Self {

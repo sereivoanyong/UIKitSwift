@@ -39,10 +39,6 @@ extension EdgesProtocol {
     set(&bottom, newEdges.bottom)
     set(&right, newEdges.right)
   }
-
-  func array<Item>() -> [Item] where Item == XAxisItem, Item == YAxisItem {
-    [top, left, bottom, right]
-  }
 }
 
 extension EdgesProtocol where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
@@ -75,6 +71,14 @@ public struct Edges<XAxisItem, YAxisItem>: EdgesProtocol {
     self.left = left
     self.bottom = bottom
     self.right = right
+  }
+}
+
+extension Edges where XAxisItem == YAxisItem {
+
+  @inlinable
+  public var all: [XAxisItem] {
+    [top, left, bottom, right]
   }
 }
 

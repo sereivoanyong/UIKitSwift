@@ -22,22 +22,27 @@ extension XAxisEdgesProtocol where XAxisItem: AdditiveArithmetic {
   }
 }
 
-public struct XAxisEdges<Item>: XAxisEdgesProtocol {
+public struct XAxisEdges<XAxisItem>: XAxisEdgesProtocol {
 
-  public var left, right: Item
+  public var left, right: XAxisItem
 
-  public init(left: Item, right: Item) {
+  public init(left: XAxisItem, right: XAxisItem) {
     self.left = left
     self.right = right
   }
+
+  @inlinable
+  public var all: [XAxisItem] {
+    [left, right]
+  }
 }
 
-extension XAxisEdges: Equatable where Item: Equatable { }
-extension XAxisEdges: Hashable where Item: Hashable { }
-extension XAxisEdges: Decodable where Item: Decodable { }
-extension XAxisEdges: Encodable where Item: Encodable { }
+extension XAxisEdges: Equatable where XAxisItem: Equatable { }
+extension XAxisEdges: Hashable where XAxisItem: Hashable { }
+extension XAxisEdges: Decodable where XAxisItem: Decodable { }
+extension XAxisEdges: Encodable where XAxisItem: Encodable { }
 
-extension XAxisEdges: AdditiveArithmetic where Item: AdditiveArithmetic {
+extension XAxisEdges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic {
 
   @inlinable
   public static var zero: Self {
