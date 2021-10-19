@@ -52,8 +52,6 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
         case .pickerView(let pickerView, let adapter):
           if let selectedItem = selectedItem, let row = adapter.items.firstIndex(of: selectedItem) {
             pickerView.selectRow(row, inComponent: 0, animated: false)
-          } else {
-            assertionFailure("`Source.pickerView` requires selected item to be in `items` and not nil. Consider using table view instead")
           }
 
         case .presentation:
