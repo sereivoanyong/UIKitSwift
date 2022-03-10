@@ -10,55 +10,84 @@ import UIKit
 
 open class CollectionViewController: UIViewController {
 
-  open class var collectionViewLayoutClass: UICollectionViewLayout.Type {
-    return UICollectionViewFlowLayout.self
-  }
-
-  open class var collectionViewClass: UICollectionView.Type {
-    return UICollectionView.self
-  }
-
-  public let collectionViewLayout: UICollectionViewLayout
-
-  lazy public private(set) var collectionView: UICollectionView = {
-    let collectionView = Self.collectionViewClass.init(frame: UIScreen.main.bounds, collectionViewLayout: collectionViewLayout)
-    collectionView.backgroundColor = .clear
-    collectionView.clipsToBounds = false
-    collectionView.alwaysBounceHorizontal = false
-    collectionView.alwaysBounceVertical = true
-    collectionView.showsHorizontalScrollIndicator = false
-    collectionView.showsVerticalScrollIndicator = true
-    collectionView.preservesSuperviewLayoutMargins = true
-    collectionView.delegate = self as? UICollectionViewDelegate
-    collectionView.dataSource = self as? UICollectionViewDataSource
-    if #available(iOS 10.0, *) {
-      collectionView.prefetchDataSource = self as? UICollectionViewDataSourcePrefetching
-    }
-    if #available(iOS 11.0, *) {
-      collectionView.dragDelegate = self as? UICollectionViewDragDelegate
-      collectionView.dropDelegate = self as? UICollectionViewDropDelegate
-    }
-    return collectionView
-  }()
-
+  /// If this property is `true`, `collectionView` and `view` are the same.
   open var isCollectionViewRoot: Bool = false
 
-  open var invalidatesCollectionViewLayoutLayout: Bool = true
+  open var invalidatesLayoutOnViewWillTransition: Bool = true
 
   public init(collectionViewLayout: UICollectionViewLayout) {
-    self.collectionViewLayout = collectionViewLayout
+    _collectionViewLayout = collectionViewLayout
     super.init(nibName: nil, bundle: nil)
   }
 
   public override init(nibName: String? = nil, bundle: Bundle? = nil) {
-    collectionViewLayout = Self.collectionViewLayoutClass.init()
     super.init(nibName: nibName, bundle: bundle)
   }
 
   public required init?(coder: NSCoder) {
-    collectionViewLayout = Self.collectionViewLayoutClass.init()
     super.init(coder: coder)
   }
+
+  // MARK: Collection View Lifecycle
+
+  private var _collectionViewLayout: UICollectionViewLayout!
+  open var collectionViewLayout: UICollectionViewLayout {
+    if _collectionViewLayout == nil {
+      _collectionViewLayout = makeCollectionViewLayout()
+    }
+    return _collectionViewLayout
+  }
+
+  private var _collectionView: UICollectionView!
+  open var collectionView: UICollectionView {
+    get {
+      if _collectionView == nil {
+        loadCollectionView()
+        collectionViewDidLoad()
+      }
+      return _collectionView
+    }
+    set {
+      precondition(_collectionView == nil, "Collection view can only be set before it is loaded.")
+      _collectionView = newValue
+    }
+  }
+
+  open func makeCollectionViewLayout() -> UICollectionViewLayout {
+    fatalError("\(#function) has not been implemented")
+  }
+
+  open func loadCollectionView() {
+    let collectionView = UICollectionView(frame: UIScreen.main.bounds, collectionViewLayout: collectionViewLayout)
+    collectionView.backgroundColor = .clear
+    collectionView.preservesSuperviewLayoutMargins = true
+    collectionView.alwaysBounceHorizontal = false
+    collectionView.alwaysBounceVertical = true
+    collectionView.showsHorizontalScrollIndicator = false
+    collectionView.showsVerticalScrollIndicator = true
+    collectionView.dataSource = self as? UICollectionViewDataSource
+    collectionView.delegate = self as? UICollectionViewDelegate
+    collectionView.prefetchDataSource = self as? UICollectionViewDataSourcePrefetching
+    if #available(iOS 11.0, *) {
+      collectionView.dragDelegate = self as? UICollectionViewDragDelegate
+      collectionView.dropDelegate = self as? UICollectionViewDropDelegate
+    }
+    self.collectionView = collectionView
+  }
+
+  open var collectionViewIfLoaded: UICollectionView? {
+    _collectionView
+  }
+
+  open func collectionViewDidLoad() {
+
+  }
+
+  open var isCollectionViewLoaded: Bool {
+    _collectionView != nil
+  }
+
+  // MARK: View Lifecycle
 
   open override func loadView() {
     if isCollectionViewRoot {
@@ -74,14 +103,17 @@ open class CollectionViewController: UIViewController {
     if !isCollectionViewRoot {
       collectionView.frame = view.bounds
       collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-      view.addSubview(collectionView)
+      view.insertSubview(collectionView, at: 0)
     }
   }
 
   open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
 
-    if invalidatesCollectionViewLayoutLayout {
+    if invalidatesLayoutOnViewWillTransition {
+      if #available(iOS 13.0, *), collectionViewLayout is UICollectionViewCompositionalLayout {
+        return
+      }
       collectionViewLayout.invalidateLayout()
     }
   }
