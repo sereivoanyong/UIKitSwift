@@ -22,6 +22,10 @@ open class PickerListViewController<Item>: CollectionViewController, UICollectio
     /// - `saveAndShowHandler` is invoked on selection.
     case pushWithSaveAndShowChangeOnSelection(saveAndShowHandler: (Item) -> Void) // appearance, font, etc.
 
+    /// Exit via navigation `backButtonItem` or pop gesture
+    /// - `saveHandler` is invoked on selection.
+    case pushWithSaveChangeOnSelectionThenPop(saveHandler: (Item) -> Void)
+
     /// Exit via `doneButtonItem`
     /// - `saveAndShowHandler` is invoked on selection.
     case presentWithSaveAndShowChangeOnSelection(saveAndShowHandler: (Item) -> Void)
@@ -122,6 +126,8 @@ open class PickerListViewController<Item>: CollectionViewController, UICollectio
       switch behavior {
       case .pushWithSaveAndShowChangeOnSelection:
         break
+      case .pushWithSaveChangeOnSelectionThenPop:
+        break
       case .presentWithSaveAndShowChangeOnSelection:
         navigationItem.rightBarButtonItem = doneButtonItem // to exit
       case .presentWithShowChangeOnSelection:
@@ -137,6 +143,8 @@ open class PickerListViewController<Item>: CollectionViewController, UICollectio
   @objc open func done(_ sender: Any?) {
     switch behavior {
     case .pushWithSaveAndShowChangeOnSelection:
+      fatalError()
+    case .pushWithSaveChangeOnSelectionThenPop:
       fatalError()
     case .presentWithSaveAndShowChangeOnSelection:
       dismiss(animated: true, completion: nil)
@@ -154,6 +162,8 @@ open class PickerListViewController<Item>: CollectionViewController, UICollectio
   @objc open func cancel(_ sender: UIBarButtonItem) {
     switch behavior {
     case .pushWithSaveAndShowChangeOnSelection:
+      fatalError()
+    case .pushWithSaveChangeOnSelectionThenPop:
       fatalError()
     case .presentWithSaveAndShowChangeOnSelection:
       fatalError()
@@ -197,6 +207,9 @@ open class PickerListViewController<Item>: CollectionViewController, UICollectio
     switch behavior {
     case .pushWithSaveAndShowChangeOnSelection(let saveAndShowHandler):
       saveAndShowHandler(newSelectedItem)
+    case .pushWithSaveChangeOnSelectionThenPop(let saveHandler):
+      saveHandler(newSelectedItem)
+      navigationController?.popViewController(animated: true)
     case .presentWithSaveAndShowChangeOnSelection(let saveAndShowHandler):
       saveAndShowHandler(newSelectedItem)
     case .presentWithShowChangeOnSelection(_, let showHandler, _):
