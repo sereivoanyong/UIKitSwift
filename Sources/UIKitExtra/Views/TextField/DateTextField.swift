@@ -46,7 +46,7 @@ open class DateTextField: DropdownTextField {
   /// The date, the representable text of which is displayed by the text field.
   ///
   /// If the value is nil, it will be set to `Date()` in `becomeFirstResponder()`
-  open var date: Date? {
+  @objc open var date: Date? {
     get { _date }
     set(newDate) {
       if let newDate = newDate {
