@@ -62,12 +62,12 @@ open class DropdownTextField: TextField {
   }
 
   private func commonInit() {
-    Self.swizzlingHandler
-    autocapitalizationType = .none
+    _ = Self.swizzlingHandler
+
     // See: https://github.com/hackiftekhar/IQKeyboardManager/issues/1616#issuecomment-566500228
     autocorrectionType = .no
 
-    setBecomesFirstResponderOnClearButtonTap(true)
+    // setBecomesFirstResponderOnClearButtonTap(true)
 
     dropdownView.image = defaultDropdownImage
     addSubview(dropdownView)

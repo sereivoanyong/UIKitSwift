@@ -14,21 +14,23 @@ open class DateTextField: DropdownTextField {
   public static let dateDidChangeNotification: Notification.Name = Notification.Name("DateTextFieldDateDidChangeNotification")
 
   open class var datePickerClass: UIDatePicker.Type {
-    UIDatePicker.self
+    return UIDatePicker.self
   }
 
-  private let inputViewWrapperView: UIView
   lazy private var _dateTransformer: DateTransformer = .default
   private var _date: Date?
+
+  lazy private var inputViewWrapperView: UIView = Self.wrapperView(inputView: datePicker)
 
   /// The date picker managed by the text field and used for custom input view.
   ///
   /// Its `date` must not be changed directly.
-  public let datePicker: UIDatePicker = {
-    let datePicker = datePickerClass.init()
+  lazy open private(set) var datePicker: UIDatePicker = {
+    let datePicker = Self.datePickerClass.init()
     if #available(iOS 13.4, *) {
       datePicker.preferredDatePickerStyle = .wheels
     }
+    datePicker.addTarget(self, action: #selector(dateDidChange(_:)), for: .valueChanged)
     return datePicker
   }()
 
@@ -73,24 +75,6 @@ open class DateTextField: DropdownTextField {
     }
   }
 
-  // MARK: Initializer
-
-  public override init(frame: CGRect = .zero) {
-    inputViewWrapperView = Self.wrapperView(inputView: datePicker)
-    super.init(frame: frame)
-    commonInit()
-  }
-
-  public required init?(coder: NSCoder) {
-    inputViewWrapperView = Self.wrapperView(inputView: datePicker)
-    super.init(coder: coder)
-    commonInit()
-  }
-
-  private func commonInit() {
-    datePicker.addTarget(self, action: #selector(dateDidChange(_:)), for: .valueChanged)
-  }
-
   // MARK: Private
 
   @objc private func dateDidChange(_ datePicker: UIDatePicker) {
@@ -129,7 +113,9 @@ open class DateTextField: DropdownTextField {
     let become = super.becomeFirstResponder()
     if become {
       if date == nil {
-        date = Date()
+        let date = Date()
+        let text = dateTransformer.string(from: date)
+        setDate(date, text: text, updatePicker: false, sendValueChangedActions: true)
       }
     }
     return become

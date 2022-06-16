@@ -13,7 +13,7 @@ public typealias DoubleTextField = NumberTextField<Double> // Formatted
 public typealias FloatTextField = NumberTextField<Float> // Formatted
 public typealias IntTextField = NumberTextField<Int> // Lossless
 
-open class NumberTextField<Value>: TextField, UITextFieldDelegate where Value: _ObjectiveCBridgeable & Comparable, Value._ObjectiveCType: NSNumber {
+open class NumberTextField<Value: _ObjectiveCBridgeable & Comparable>: TextField, UITextFieldDelegate where Value._ObjectiveCType: NSNumber {
 
   // Not called when the `value` is changed programmatically.
   public static var valueDidChangeNotification: Notification.Name {
@@ -71,6 +71,7 @@ open class NumberTextField<Value>: TextField, UITextFieldDelegate where Value: _
 
   private func commonInit() {
     NotificationCenter.default.addObserver(self, selector: #selector(textDidChange(_:)), name: Self.textDidChangeNotification, object: self)
+    keyboardType = Value.self is LosslessStringConvertible.Type ? .numberPad : .decimalPad
     delegate = self
   }
 
@@ -201,7 +202,6 @@ extension NumberTextField {
       self.textColor = textColor
     }
     self.placeholder = placeholder
-    self.keyboardType = .decimalPad
     self.transformer = .formatted(formatter)
     self.value = value
   }
@@ -216,7 +216,6 @@ extension NumberTextField {
       self.textColor = textColor
     }
     self.placeholder = placeholder
-    self.keyboardType = .numberPad
     self.transformer = .default
     self.value = value
   }
