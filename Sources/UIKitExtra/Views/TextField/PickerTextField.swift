@@ -38,7 +38,7 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
 
   open var textProvider: (Item) -> String = String.init(describing:) {
     didSet {
-      text = selectedItem.map(textProvider)
+      setNeedsTextProviderUpdate()
     }
   }
 
@@ -66,6 +66,13 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
     didChangeValue(forKey: "selectedItem")
   }
 
+  open func setNeedsTextProviderUpdate() {
+    text = selectedItem.map(textProvider)
+    if case .pickerView(let pickerView, _) = source {
+      pickerView.reloadAllComponents()
+    }
+  }
+
   open func setSourcePickerView(_ pickerView: UIPickerView? = nil, configurationHandler: ((PickerViewAdapter<Item>) -> Void)? = nil) where Item: CaseIterable, Item.AllCases == [Item] {
     setSourcePickerView(pickerView, items: Item.allCases, configurationHandler: configurationHandler)
   }
@@ -73,10 +80,13 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
   open func setSourcePickerView(_ pickerView: UIPickerView? = nil, items: [Item], configurationHandler: ((PickerViewAdapter<Item>) -> Void)? = nil) {
     let pickerView = pickerView ?? UIPickerView()
     let adapter = PickerViewAdapter(pickerView: pickerView, items: items)
+    adapter.titleProvider = { [unowned self] _, _, _, item in
+      self.textProvider(item)
+    }
     configurationHandler?(adapter)
     assert(adapter.selectionHandler == nil, "`selectionHandler` is managed by the textField")
     adapter.selectionHandler = { [unowned self] _, _, _, item in
-      select(item, updateSource: false, sendValueChangedActions: true)
+      self.select(item, updateSource: false, sendValueChangedActions: true)
     }
     source = .pickerView(pickerView, adapter: adapter)
     inputViewWrapperView = Self.wrapperView(inputView: pickerView)
@@ -117,7 +127,7 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
         if _presentingViewController == nil {
           UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
           _presentingViewController = handler(selectedItem, { [unowned self] item in
-            select(item, updateSource: false, sendValueChangedActions: true)
+            self.select(item, updateSource: false, sendValueChangedActions: true)
           })
         }
       }
