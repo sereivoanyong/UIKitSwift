@@ -12,7 +12,7 @@ final class RootViewController: UIViewController {
   init() {
     super.init(nibName: nil, bundle: nil)
 
-    title = "SwiftUIKit Example"
+    title = "UIKitSwift Example"
   }
 
   @available(*, unavailable)

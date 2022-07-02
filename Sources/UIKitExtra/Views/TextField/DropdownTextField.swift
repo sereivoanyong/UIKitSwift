@@ -157,13 +157,13 @@ extension DropdownTextField {
   private static let swizzlingHandler: Void = {
     let selector = Selector(("_clearButtonClicked:"))
     if instancesRespond(to: selector) {
-      class_exchangeInstanceMethodImplementations(DropdownTextField.self, selector, #selector(_swiftuikit_clearButtonClicked))
+      class_exchangeInstanceMethodImplementations(DropdownTextField.self, selector, #selector(_uikitswift_clearButtonClicked))
     }
   }()
 
-  @objc private func _swiftuikit_clearButtonClicked(_ sender: Any?) {
+  @objc private func _uikitswift_clearButtonClicked(_ sender: Any?) {
     let textBefore = text
-    _swiftuikit_clearButtonClicked(sender)
+    _uikitswift_clearButtonClicked(sender)
     if textBefore != text {
       clear()
       resignFirstResponder()

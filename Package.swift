@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-  name: "SwiftUIKit",
+  name: "UIKitSwift",
   platforms: [
     .iOS(.v10)
   ],
   products: [
-    .library(name: "SwiftUIKit", targets: ["SwiftUIKit"]),
+    .library(name: "UIKitSwift", targets: ["UIKitSwift"]),
 
     .library(name: "UIKitAdapter", targets: ["UIKitAdapter"]),
     .library(name: "DTPhotoViewerControllerAdapter", targets: ["DTPhotoViewerControllerAdapter"]),
@@ -22,7 +22,7 @@ let package = Package(
     .package(url: "https://github.com/tungvoduc/DTPhotoViewerController", from: "3.1.1"),
   ],
   targets: [
-    .target(name: "SwiftUIKit", dependencies: ["UIKitAdapter", "UIKitLayout", "UIKitExtra"]),
+    .target(name: "UIKitSwift", dependencies: ["UIKitAdapter", "UIKitLayout", "UIKitExtra"]),
 
     .target(name: "UIKitAdapter"),
     .testTarget(name: "UIKitAdapterTests", dependencies: ["UIKitAdapter"]),
