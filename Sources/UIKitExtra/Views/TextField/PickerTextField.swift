@@ -17,10 +17,9 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
   public enum Source {
 
     case pickerView(UIPickerView, adapter: PickerViewAdapter<Item>)
-    case presentation(handler: (Item?, @escaping (Item?) -> Void) -> UIViewController)
+    case presentation(handler: (Item?, @escaping (Item?) -> Void) -> Void)
   }
 
-  weak private var _presentingViewController: UIViewController?
   private var inputViewWrapperView: UIView!
 
   open override var inputView: UIView? {
@@ -92,7 +91,7 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
     inputViewWrapperView = Self.wrapperView(inputView: pickerView)
   }
 
-  open func setSourcePresentation(handler: @escaping (Item?, @escaping (Item?) -> Void) -> UIViewController) {
+  open func setSourcePresentation(handler: @escaping (Item?, @escaping (Item?) -> Void) -> Void) {
     source = .presentation(handler: handler)
   }
 
@@ -122,14 +121,10 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
         }
 
       case .presentation(let handler):
-        // It seems like `UIKit` retries to becomeFirstResponder after the function returns false.
-        // So we keep weak reference to presenting view controller & invoke the handler only if it is not nil
-        if _presentingViewController == nil {
-          UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
-          _presentingViewController = handler(selectedItem, { [unowned self] item in
-            self.select(item, updateSource: false, sendValueChangedActions: true)
-          })
-        }
+        UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
+        handler(selectedItem, { [unowned self] item in
+          self.select(item, updateSource: false, sendValueChangedActions: true)
+        })
       }
     }
     return become
