@@ -56,7 +56,7 @@ extension TextField {
     public var verticalAlignment: ContentVerticalAlignment?
 
     /// The space between the overlay view and the edge.
-    public var padding: CGFloat = 0
+    public var padding: CGFloat = 5
   }
 }
 
@@ -73,40 +73,42 @@ extension TextField {
 @IBDesignable
 open class TextField: UITextField {
 
-  /// The custom distance that the text is inset from edges or overlay views if they exist.
+  /// The custom distance that the content is inset from edges (text or overlay views if they exist).
   open var insets: UIEdgeInsets = .zero
-
-  open var overrideClearButtonPadding: CGFloat?
 
   open var leftViewLayoutAttributes: ViewLayoutAttributes = .init()
 
   open var rightViewLayoutAttributes: ViewLayoutAttributes = .init()
 
   open override func textRect(forBounds bounds: CGRect) -> CGRect {
-    adjustedTextRect(forTextRect: super.textRect(forBounds: bounds), forEditing: false)
+    return adjustedTextRect(forTextRect: super.textRect(forBounds: bounds), forEditing: false)
   }
 
   open override func editingRect(forBounds bounds: CGRect) -> CGRect {
-    adjustedTextRect(forTextRect: super.editingRect(forBounds: bounds), forEditing: true)
+    return adjustedTextRect(forTextRect: super.editingRect(forBounds: bounds), forEditing: true)
   }
 
   // Easier for subclasses to override one for all
   func adjustedTextRect(forTextRect textRect: CGRect, forEditing: Bool) -> CGRect {
-    textRect.inset(by: insets)
+    var insets = insets
+    if isVisible(for: leftViewMode) {
+      insets.left = leftViewLayoutAttributes.padding
+    }
+    if isVisible(for: rightViewMode) {
+      insets.right += rightViewLayoutAttributes.padding
+    }
+    return textRect.inset(by: insets)
   }
 
   open override func clearButtonRect(forBounds bounds: CGRect) -> CGRect {
     var clearButtonRect = super.clearButtonRect(forBounds: bounds)
-    if let overrideClearButtonPadding = overrideClearButtonPadding {
-      clearButtonRect.size.width = bounds.width - (clearButtonRect.width + overrideClearButtonPadding)
-    }
+    clearButtonRect.origin.x -= insets.right
     return clearButtonRect
   }
-
   open override func leftViewRect(forBounds bounds: CGRect) -> CGRect {
     assert(isVisible(for: leftViewMode))
     var leftViewRect = super.leftViewRect(forBounds: bounds)
-    leftViewRect.origin.x += leftViewLayoutAttributes.padding
+    leftViewRect.origin.x += insets.left
     apply(leftViewLayoutAttributes, to: &leftViewRect)
     return leftViewRect
   }
@@ -114,7 +116,7 @@ open class TextField: UITextField {
   open override func rightViewRect(forBounds bounds: CGRect) -> CGRect {
     assert(isVisible(for: rightViewMode))
     var rightViewRect = super.rightViewRect(forBounds: bounds)
-    rightViewRect.origin.x -= rightViewLayoutAttributes.padding
+    rightViewRect.origin.x -= insets.right
     apply(rightViewLayoutAttributes, to: &rightViewRect)
     return rightViewRect
   }

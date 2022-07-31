@@ -32,6 +32,7 @@ open class DropdownTextField: TextField {
     return imageView
   }()
 
+  // Space between dropdown and its sibling content (text or right view if exists)
   open var dropdownViewPadding: CGFloat = 5 {
     didSet {
       setNeedsLayout()
@@ -98,12 +99,15 @@ open class DropdownTextField: TextField {
   }
 
   open var dropdownViewSize: CGSize {
-    dropdownView.frame.size
+    if dropdownView.frame.size == .zero {
+      dropdownView.sizeToFit()
+    }
+    return dropdownView.frame.size
   }
 
   open func dropdownViewRect(forBounds bounds: CGRect) -> CGRect {
     let size = dropdownView.systemLayoutSizeFitting(bounds.size)
-    return CGRect(origin: CGPoint(x: bounds.width - dropdownViewPadding - size.width, y: (bounds.height - size.height) / 2), size: size)
+    return CGRect(origin: CGPoint(x: bounds.width - insets.right - size.width, y: (bounds.height - size.height) / 2), size: size)
   }
 
   open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
