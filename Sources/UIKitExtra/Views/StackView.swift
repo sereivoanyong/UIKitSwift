@@ -79,7 +79,7 @@ open class StackView: UIStackView {
 
     precondition(separatorViews.count == arrangedSubviews.count - 1)
 
-    var inset = separatorInset
+    var insets = separatorInset
     let referenceInset: UIEdgeInsets
     switch separatorInsetReference {
     case .fromEdges:
@@ -92,7 +92,7 @@ open class StackView: UIStackView {
     case .fromLayoutMargins:
       referenceInset = layoutMargins
     }
-    inset = UIEdgeInsets(top: inset.top + referenceInset.top, left: inset.left + referenceInset.left, bottom: inset.bottom + referenceInset.bottom, right: inset.right + referenceInset.right)
+    insets = UIEdgeInsets(top: insets.top + referenceInset.top, left: insets.left + referenceInset.left, bottom: insets.bottom + referenceInset.bottom, right: insets.right + referenceInset.right)
 
     let thickness = separatorThickness > 0 ? separatorThickness : (1 / traitCollection.displayScale)
 
@@ -101,12 +101,12 @@ open class StackView: UIStackView {
     case .vertical:
       frameProvider = { [unowned self] topView, bottomView in
         let y = topView.frame.maxY + ceil((bottomView.frame.minY - topView.frame.maxY + thickness) / 2, by: traitCollection.displayScale)
-        return CGRect(x: layoutMargins.left, y: y, width: bounds.width - layoutMargins.left - layoutMargins.right, height: thickness)
+        return CGRect(x: insets.left, y: y, width: bounds.width - insets.left - insets.right, height: thickness)
       }
     default:
       frameProvider = { [unowned self] leftView, rightView in
         let x = leftView.frame.maxX + ceil((rightView.frame.minX - leftView.frame.maxX + thickness) / 2, by: traitCollection.displayScale)
-        return CGRect(x: x, y: layoutMargins.top, width: thickness, height: bounds.height - layoutMargins.top - layoutMargins.bottom)
+        return CGRect(x: x, y: insets.top, width: thickness, height: bounds.height - insets.top - insets.bottom)
       }
     }
 
