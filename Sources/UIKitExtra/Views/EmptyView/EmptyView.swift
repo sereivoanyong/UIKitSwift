@@ -51,9 +51,6 @@ open class EmptyView: UIView {
 
   open private(set) var state: State? {
     didSet {
-      guard state != oldValue else {
-        return
-      }
       prepareForReuse()
       if let state = state {
         dataSource?.emptyView(self, configureContentFor: state)
