@@ -17,8 +17,10 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
   public enum Source {
 
     case pickerView(UIPickerView, adapter: PickerViewAdapter<Item>)
-    case presentation(handler: (Item?, @escaping (Item?) -> Void) -> Void)
+    case presentation(handler: (Item?, @escaping (Item?) -> Void) -> UIViewController)
   }
+
+  private weak var presentingViewController: UIViewController?
 
   private var inputViewWrapperView: UIView!
 
@@ -91,15 +93,17 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
     inputViewWrapperView = Self.wrapperView(inputView: pickerView)
   }
 
-  open func setSourcePresentation(handler: @escaping (Item?, @escaping (Item?) -> Void) -> Void) {
+  open func setSourcePresentation(handler: @escaping (Item?, @escaping (Item?) -> Void) -> UIViewController) {
     source = .presentation(handler: handler)
   }
 
   open override var canBecomeFirstResponder: Bool {
-    if case .presentation = source {
+    // `UIKit` will call `textFieldShouldBeginEditing(_:)` here
+    let canBecomeFirstResponder = super.canBecomeFirstResponder
+    if canBecomeFirstResponder, case .presentation = source {
       return false
     }
-    return super.canBecomeFirstResponder // `UIKit` will call `textFieldShouldBeginEditing(_:)` here
+    return canBecomeFirstResponder
   }
 
   @discardableResult
@@ -122,9 +126,11 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
 
       case .presentation(let handler):
         UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
-        handler(selectedItem, { [unowned self] item in
-          self.select(item, updateSource: false, sendValueChangedActions: true)
-        })
+        if presentingViewController == nil {
+          presentingViewController = handler(self.selectedItem, { [unowned self] item in
+            self.select(item, updateSource: false, sendValueChangedActions: true)
+          })
+        }
       }
     }
     return become
