@@ -43,11 +43,18 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
     }
   }
 
+  open var itemUpdateHandler: ((PickerTextField<Item>) -> Void)? {
+    didSet {
+      itemUpdateHandler?(self)
+    }
+  }
+
   private func select(_ selectedItem: Item?, updateSource: Bool, sendValueChangedActions: Bool) {
     willChangeValue(forKey: "selectedItem")
     if selectedItem != _selectedItem {
       _selectedItem = selectedItem
       text = selectedItem.map(textProvider)
+      itemUpdateHandler?(self)
       if updateSource, let source = source {
         switch source {
         case .pickerView(let pickerView, let adapter):
