@@ -65,8 +65,14 @@ open class DropdownTextField: TextField {
   private func commonInit() {
     _ = Self.swizzlingHandler
 
-    // See: https://github.com/hackiftekhar/IQKeyboardManager/issues/1616#issuecomment-566500228
-    autocorrectionType = .no
+    autocapitalizationType = .none
+    autocorrectionType = .no // See: https://github.com/hackiftekhar/IQKeyboardManager/issues/1616#issuecomment-566500228
+    spellCheckingType = .no
+    if #available(iOS 11.0, *) {
+      smartQuotesType = .no
+      smartDashesType = .no
+      smartInsertDeleteType = .no
+    }
 
     // setBecomesFirstResponderOnClearButtonTap(true)
 
