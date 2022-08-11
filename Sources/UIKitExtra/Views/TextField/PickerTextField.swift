@@ -10,6 +10,8 @@ import UIKit
 
 open class PickerTextField<Item: Equatable>: DropdownTextField {
 
+  public typealias AdapterProvider = (UIPickerView, [Item]) -> PickerViewAdapter<Item>
+
   public static var selectedItemDidChangeNotification: Notification.Name {
     Notification.Name("PickerTextField<\(Item.self)>SelectedItemDidChangeNotification")
   }
@@ -81,13 +83,13 @@ open class PickerTextField<Item: Equatable>: DropdownTextField {
     }
   }
 
-  open func setSourcePickerView(_ pickerView: UIPickerView? = nil, configurationHandler: ((PickerViewAdapter<Item>) -> Void)? = nil) where Item: CaseIterable, Item.AllCases == [Item] {
+  open func setSourcePickerView(_ pickerView: UIPickerView? = nil, adapterProvider: AdapterProvider? = nil, configurationHandler: ((PickerViewAdapter<Item>) -> Void)? = nil) where Item: CaseIterable, Item.AllCases == [Item] {
     setSourcePickerView(pickerView, items: Item.allCases, configurationHandler: configurationHandler)
   }
 
-  open func setSourcePickerView(_ pickerView: UIPickerView? = nil, items: [Item], configurationHandler: ((PickerViewAdapter<Item>) -> Void)? = nil) {
+  open func setSourcePickerView(_ pickerView: UIPickerView? = nil, adapterProvider: AdapterProvider? = nil, items: [Item], configurationHandler: ((PickerViewAdapter<Item>) -> Void)? = nil) {
     let pickerView = pickerView ?? UIPickerView()
-    let adapter = PickerViewAdapter(pickerView: pickerView, items: items)
+    let adapter = adapterProvider?(pickerView, items) ?? PickerViewAdapter<Item>(pickerView: pickerView, items: items)
     adapter.titleProvider = { [unowned self] _, _, _, item in
       self.textProvider(item)
     }
