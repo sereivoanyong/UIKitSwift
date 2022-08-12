@@ -41,9 +41,6 @@ open class PickerListViewController<Item>: CollectionViewController, UICollectio
     case presentWithSaveChangeOnSelectionThenDismiss(saveHandler: (Item) -> Void)
   }
 
-  lazy open private(set) var doneButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done(_:)))
-  lazy open private(set) var cancelButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel(_:)))
-
   private let equalityProvider: (Item, Item) -> Bool
 
   public let behavior: Behavior
@@ -121,23 +118,42 @@ open class PickerListViewController<Item>: CollectionViewController, UICollectio
     view.backgroundColor = .systemBackground
   }
 
-  open override func willMove(toParent parent: UIViewController?) {
-    if let navigationController = parent as? UINavigationController, navigationController.viewControllers.count == 1 {
-      switch behavior {
-      case .pushWithSaveAndShowChangeOnSelection:
-        break
-      case .pushWithSaveChangeOnSelectionThenPop:
-        break
-      case .presentWithSaveAndShowChangeOnSelection:
-        navigationItem.rightBarButtonItem = doneButtonItem // to exit
-      case .presentWithShowChangeOnSelection:
-        navigationItem.rightBarButtonItem = doneButtonItem // to save then dismiss
-        navigationItem.leftBarButtonItem = cancelButtonItem // to exit
-      case .presentWithSaveChangeOnSelectionThenDismiss:
-        navigationItem.leftBarButtonItem = cancelButtonItem // to exit
+  open override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+
+    if let navigationController = navigationController, navigationController.isBeingPresented {
+      if navigationController.viewControllers.first === self {
+        if #available(iOS 15.0, *), navigationController.sheetPresentationController != nil {
+          switch behavior {
+          case .pushWithSaveAndShowChangeOnSelection:
+            break
+          case .pushWithSaveChangeOnSelectionThenPop:
+            break
+          case .presentWithSaveAndShowChangeOnSelection:
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(done(_:)))
+          case .presentWithShowChangeOnSelection:
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done(_:))) // to save then dismiss
+            navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel(_:))) // to exit
+          case .presentWithSaveChangeOnSelectionThenDismiss:
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(cancel(_:)))
+          }
+        } else {
+          switch behavior {
+          case .pushWithSaveAndShowChangeOnSelection:
+            break
+          case .pushWithSaveChangeOnSelectionThenPop:
+            break
+          case .presentWithSaveAndShowChangeOnSelection:
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done(_:))) // to exit
+          case .presentWithShowChangeOnSelection:
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done(_:))) // to save then dismiss
+            navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel(_:))) // to exit
+          case .presentWithSaveChangeOnSelectionThenDismiss:
+            navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel(_:))) // to exit
+          }
+        }
       }
     }
-    super.willMove(toParent: parent)
   }
 
   @objc open func done(_ sender: Any?) {
