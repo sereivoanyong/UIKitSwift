@@ -13,15 +13,15 @@ public typealias DoubleTextField = NumberTextField<Double> // Formatted
 public typealias FloatTextField = NumberTextField<Float> // Formatted
 public typealias IntTextField = NumberTextField<Int> // Lossless
 
-open class NumberTextField<Value: _ObjectiveCBridgeable & Comparable>: TextField, UITextFieldDelegate where Value._ObjectiveCType: NSNumber {
+open class NumberTextField<Value: _ObjectiveCBridgeable & Comparable & AdditiveArithmetic>: TextField, UITextFieldDelegate where Value._ObjectiveCType: NSNumber {
 
   // Not called when the `value` is changed programmatically.
   public static var valueDidChangeNotification: Notification.Name {
-    Notification.Name("NumberTextFieldValueDidChangeNotification")
+    return Notification.Name("NumberTextFieldValueDidChangeNotification")
   }
 
   open override var delegate: UITextFieldDelegate? {
-    get { super.delegate }
+    get { return super.delegate }
     set {
       assert(newValue is Self, "`textField(_:shouldChangeCharactersIn:replacementString:)`")
       super.delegate = newValue
@@ -46,14 +46,33 @@ open class NumberTextField<Value: _ObjectiveCBridgeable & Comparable>: TextField
     }
   }
 
+  open var showsSignForOverrideSignumWhenNotZero: Bool = false {
+    willSet {
+      if case .formatted(let formatter) = transformer, formatter.positivePrefix.isEmpty {
+        fatalError()
+      }
+    }
+  }
+
+  open var overrideSignum: Int? {
+    didSet {
+      if let value = value {
+        setValue(signumedValue(value), sendValueChangedActions: true)
+      }
+    }
+  }
+
   private var _value: Value?
+
+  /// New value will be transformed to validated version before setting.
   open var value: Value? {
-    get { _value }
+    get { return _value }
     set { setValue(newValue) }
   }
 
+  /// New text will be transformed to validated version before setting. `value` is always set first.
   open override var text: String? {
-    get { super.text }
+    get { return super.text }
     set(newText) { setText(newText)}
   }
 
@@ -70,37 +89,49 @@ open class NumberTextField<Value: _ObjectiveCBridgeable & Comparable>: TextField
   }
 
   private func commonInit() {
-    NotificationCenter.default.addObserver(self, selector: #selector(textDidChange(_:)), name: Self.textDidChangeNotification, object: self)
     keyboardType = Value.self is LosslessStringConvertible.Type ? .numberPad : .decimalPad
     delegate = self
   }
 
   // MARK: Transform
 
+  /// Possibly formatted
   open func text(from value: Value) -> String? {
     assert(transformer != nil, "`transformer` must be set.")
     return transformer.string(from: value)
   }
 
+  /// if `newText` is not nil, it should be unformatted and number-parseable or it will be discarded.
+  func setText(_ newText: String?, textTransform: (String) -> String = { $0 }, sendValueChangedActions: Bool = false) {
+    if let newValue = newText.flatMap(value(from:)), let newText = text(from: newValue) {
+      let newValidatedValue = validatedValue(newValue)
+      _value = newValidatedValue
+      super.text = textTransform(validatedText(newText, newValidatedValue))
+    } else {
+      _value = nil
+      super.text = nil
+    }
+    if sendValueChangedActions {
+      sendActions(for: .valueChanged)
+      NotificationCenter.default.post(name: Self.valueDidChangeNotification, object: self)
+    }
+  }
+
   open func value(from text: String) -> Value? {
     assert(transformer != nil, "`transformer` must be set.")
+    var text = text
+    let plusSign = sign(signum: 1)
+    if text.hasPrefix(plusSign) {
+      text.removeFirst(plusSign.count)
+    }
     return transformer.number(from: text)
   }
 
   func setValue(_ newValue: Value?, sendValueChangedActions: Bool = false) {
     if let newValue = newValue, let newText = text(from: newValue) {
-      if let newClampedValue = clampedValue(newValue) {
-        if let newClampedText = text(from: newValue) {
-          _value = newClampedValue
-          super.text = newClampedText
-        } else {
-          _value = nil
-          super.text = nil
-        }
-      } else {
-        _value = newValue
-        super.text = newText
-      }
+      let newValidatedValue = validatedValue(newValue)
+      _value = newValidatedValue
+      super.text = validatedText(newText, newValidatedValue)
     } else {
       _value = nil
       super.text = nil
@@ -111,81 +142,119 @@ open class NumberTextField<Value: _ObjectiveCBridgeable & Comparable>: TextField
     }
   }
 
-  func setText(_ newText: String?, sendValueChangedActions: Bool = false) {
-    if let newText = newText, let newValue = value(from: newText) {
-      if let newClampedValue = clampedValue(newValue) {
-        if let newClampedText = text(from: newValue) {
-          _value = newClampedValue
-          super.text = newClampedText
-        } else {
-          _value = nil
-          super.text = nil
-        }
-      } else {
-        _value = newValue
-        super.text = newText
-      }
-    } else {
-      _value = nil
-      super.text = nil
-    }
-    if sendValueChangedActions {
-      sendActions(for: .valueChanged)
-      NotificationCenter.default.post(name: Self.valueDidChangeNotification, object: self)
-    }
+  open func validatedText(_ text: String, _ value: Value) -> String {
+    let text = signedTextIfNeeded(text, value)
+    return text
   }
 
-  /// Returns `nil` if the value already is in valid range.
-  private func clampedValue(_ value: Value) -> Value? {
+  private func signedTextIfNeeded(_ text: String, _  value: Value) -> String {
+    guard showsSignForOverrideSignumWhenNotZero && value != .zero else {
+      return text
+    }
+    let signPrefix: String
+    switch transformer! {
+    case .formatted(let formatter):
+      signPrefix = value > .zero ? formatter.plusSign : formatter.minusSign
+    case .custom:
+      signPrefix = value > .zero ? "+" : "-"
+    }
+    if text.hasPrefix(signPrefix) {
+      return text
+    }
+    return signPrefix + text
+  }
+
+  /// Returns `nil` if the value is already valid.
+  open func validatedValue(_ value: Value) -> Value {
+    var value = clampedValue(value)
+    value = signumedValue(value)
+    return value
+  }
+
+  private func clampedValue(_ value: Value) -> Value {
     switch (minimumValue, maximumValue) {
     case (.some(let minimumValue), .some(let maximumValue)):
       let validRange = minimumValue...maximumValue
-      return validRange ~= value ? nil : min(max(value, minimumValue), maximumValue)
+      return validRange ~= value ? value : min(max(value, minimumValue), maximumValue)
 
     case (.some(let minimumValue), .none):
-      return value < minimumValue ? minimumValue : nil
+      return value < minimumValue ? minimumValue : value
 
     case (.none, .some(let maximumValue)):
-      return value > maximumValue ? maximumValue : nil
+      return value > maximumValue ? maximumValue : value
 
     case (.none, .none):
-      return nil
+      return value
+    }
+  }
+
+  private func signumedValue(_ value: Value) -> Value {
+    if let overrideSignum = overrideSignum, overrideSignum != signum(of: value) {
+      // https://github.com/apple/swift/blob/93a78b490cc3f3c1023786930a825530ad3588c6/stdlib/public/core/Integers.swift#L364
+      let newValue = .zero - value
+      assert(signum(of: newValue) == overrideSignum)
+      return newValue
+    }
+    return value
+  }
+
+  private func signum(of value: Value) -> Int {
+    // https://github.com/apple/swift/blob/93a78b490cc3f3c1023786930a825530ad3588c6/stdlib/public/core/Integers.swift#L1253
+    return (value > .zero ? 1 : 0) - (value < .zero ? 1 : 0)
+  }
+
+  private func sign(signum: Int) -> String {
+    switch transformer! {
+    case .formatted(let formatter):
+      return signum == -1 ? formatter.minusSign : formatter.plusSign
+    case .custom:
+      return signum == -1 ? "-" : "+"
     }
   }
 
   // MARK: UITextFieldDelegate
 
-  /// Invoked after `textField(:shouldChangeCharactersIn:replacementString:)` returned `true`
-  @objc private func textDidChange(_ notification: Notification) {
-    if let text = text, !text.isEmpty {
-      _value = value(from: text)!
-      // It must be clamped as the function is called right after `textField(_:shouldChangeCharactersIn:replacementString:)`
-      assert(clampedValue(_value!) == nil)
-    } else {
-      _value = nil
-    }
-    sendActions(for: .valueChanged)
-    NotificationCenter.default.post(name: Self.valueDidChangeNotification, object: self)
-  }
-
   @objc open func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString: String) -> Bool {
     assert(textField === self)
-    let newText = (textField.text as NSString?)?.replacingCharacters(in: range, with: replacementString) ?? replacementString
-    if newText.isEmpty {
-      // `textDidEndEditing(_:)` will be called and `value` will be set to nil
-      return true
-    }
-    if let newValue = value(from: newText) {
-      if let newClampedValue = clampedValue(newValue), let newClampedText = text(from: newClampedValue) {
-        _value = newClampedValue
-        super.text = newClampedText
-        sendActions(for: .valueChanged)
-        NotificationCenter.default.post(name: Self.valueDidChangeNotification, object: self)
-        return false
+    var newText = ((textField.text ?? "") as NSString).replacingCharacters(in: range, with: replacementString)
+
+    var textTransform: (String) -> String = { $0 }
+    if case .formatted(let formatter) = transformer {
+      newText = newText.replacingOccurrences(of: formatter.groupingSeparator, with: "")
+
+      if Value.self is Decimal.Type {
+        let decimalSeparator = formatter.decimalSeparator!
+        if formatter.maximumFractionDigits > 0,
+           let decimalSeparatorRange = newText.range(of: decimalSeparator),
+           newText[decimalSeparatorRange.upperBound...].count > formatter.maximumFractionDigits {
+          return false
+        }
+        /// Check if user has just type the `decimalSeparator`
+        if newText.hasSuffix(decimalSeparator) {
+          /// `formatter` can't parse if the string has `decimalSeparator` as its suffix, so we remove it and append it later via `textTransform`
+          textTransform = { $0 + decimalSeparator }
+          newText.removeLast(decimalSeparator.count)
+        }
       }
-      // `textDidEndEditing(_:)` will be called and `value` will be set to a valid one
-      return true
     }
+
+    let isNewTextEmpty: Bool
+    if newText.isEmpty {
+      isNewTextEmpty = true
+    } else {
+      // Check if newText contains just the sign for overriden signum
+      if showsSignForOverrideSignumWhenNotZero, let overrideSignum = overrideSignum, newText == sign(signum: overrideSignum) {
+        isNewTextEmpty = true
+      } else {
+        isNewTextEmpty = false
+      }
+    }
+    if isNewTextEmpty {
+      setText(nil, sendValueChangedActions: true)
+      return false
+    }
+
+    setText(newText, textTransform: textTransform, sendValueChangedActions: true)
     return false
   }
 }

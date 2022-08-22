@@ -37,7 +37,7 @@ public enum NumberTransformer<Number: _ObjectiveCBridgeable> where Number._Objec
 extension NumberTransformer where Number: LosslessStringConvertible {
 
   public static var `default`: Self {
-    .custom({ $0.description }, { Number.init($0) })
+    return .custom({ $0.description }, { Number.init($0) })
   }
 }
 
