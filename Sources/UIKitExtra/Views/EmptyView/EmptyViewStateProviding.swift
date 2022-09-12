@@ -24,7 +24,7 @@ extension EmptyViewStateProviding where Self: UIView {
 
 extension UICollectionView: EmptyViewStateProviding {
 
-  open func state(for emptyView: EmptyView) -> EmptyView.State? {
+  public func state(for emptyView: EmptyView) -> EmptyView.State? {
     for section in 0..<numberOfSections {
       if numberOfItems(inSection: section) > 0 {
         return nil
@@ -39,7 +39,7 @@ extension UICollectionView: EmptyViewStateProviding {
 
 extension UITableView: EmptyViewStateProviding {
 
-  open func state(for emptyView: EmptyView) -> EmptyView.State? {
+  public func state(for emptyView: EmptyView) -> EmptyView.State? {
     for section in 0..<numberOfSections {
       if numberOfRows(inSection: section) > 0 {
         return nil

@@ -144,9 +144,6 @@ open class TextField: UITextField {
       }
     }
   }
-}
-
-extension TextField {
 
   final public func setBecomesFirstResponderOnClearButtonTap(_ becomesFirstResponderOnClearButtonTap: Bool) {
     let selector = Selector(("setBecomesFirstResponderOnClearButtonTap:"))
