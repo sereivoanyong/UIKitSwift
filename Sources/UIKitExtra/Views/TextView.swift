@@ -64,6 +64,12 @@ open class TextView: UITextView {
     return textView
   }()
 
+  open override var text: String! {
+    didSet {
+      updatePlaceholderTextView()
+    }
+  }
+
   @IBInspectable
   open var placeholder: String? {
     get { placeholderTextView.text }
