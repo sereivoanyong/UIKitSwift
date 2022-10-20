@@ -8,9 +8,10 @@
 
 import Foundation
 
-public protocol DirectionalXAxisEdgesProtocol {
+public protocol DirectionalXAxisEdgesProtocol<DirectionalXAxisItem> {
 
   associatedtype DirectionalXAxisItem
+
   var leading: DirectionalXAxisItem { get set }
   var trailing: DirectionalXAxisItem { get set }
 }
@@ -18,7 +19,18 @@ public protocol DirectionalXAxisEdgesProtocol {
 extension DirectionalXAxisEdgesProtocol where DirectionalXAxisItem: AdditiveArithmetic {
 
   public var horizontal: DirectionalXAxisItem {
-    leading + trailing
+    return leading + trailing
+  }
+
+  public var withoutHorizontal: Self {
+    return withHorizontal(leading: .zero, trailing: .zero)
+  }
+
+  public func withHorizontal(leading: DirectionalXAxisItem, trailing: DirectionalXAxisItem) -> Self {
+    var copy = self
+    copy.leading = leading
+    copy.trailing = trailing
+    return copy
   }
 }
 
@@ -31,32 +43,38 @@ public struct DirectionalXAxisEdges<DirectionalXAxisItem>: DirectionalXAxisEdges
     self.trailing = trailing
   }
 
-  @inlinable
   public var all: [DirectionalXAxisItem] {
-    [leading, trailing]
+    return [leading, trailing]
   }
 }
 
 extension DirectionalXAxisEdges: Equatable where DirectionalXAxisItem: Equatable { }
+
 extension DirectionalXAxisEdges: Hashable where DirectionalXAxisItem: Hashable { }
+
 extension DirectionalXAxisEdges: Decodable where DirectionalXAxisItem: Decodable { }
+
 extension DirectionalXAxisEdges: Encodable where DirectionalXAxisItem: Encodable { }
 
 extension DirectionalXAxisEdges: AdditiveArithmetic where DirectionalXAxisItem: AdditiveArithmetic {
 
-  @inlinable
   public static var zero: Self {
-    .init(leading: .zero, trailing: .zero)
+    return .init(leading: .zero, trailing: .zero)
   }
 
-  @inlinable
   public static func + (lhs: Self, rhs: Self) -> Self {
-    .init(leading: lhs.leading + rhs.leading, trailing: lhs.trailing + rhs.trailing)
+    return .init(leading: lhs.leading + rhs.leading, trailing: lhs.trailing + rhs.trailing)
   }
 
-  @inlinable
   public static func - (lhs: Self, rhs: Self) -> Self {
-    .init(leading: lhs.leading - rhs.leading, trailing: lhs.trailing - rhs.trailing)
+    return .init(leading: lhs.leading - rhs.leading, trailing: lhs.trailing - rhs.trailing)
+  }
+}
+
+extension DirectionalXAxisEdges where DirectionalXAxisItem: Numeric {
+
+  public static func * (lhs: Self, rhs: DirectionalXAxisItem) -> Self {
+    return .init(leading: lhs.leading * rhs, trailing: lhs.trailing * rhs)
   }
 }
 

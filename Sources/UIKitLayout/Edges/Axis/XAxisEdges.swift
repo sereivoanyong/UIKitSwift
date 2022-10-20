@@ -8,9 +8,10 @@
 
 import Foundation
 
-public protocol XAxisEdgesProtocol {
+public protocol XAxisEdgesProtocol<XAxisItem> {
 
   associatedtype XAxisItem
+
   var left: XAxisItem { get set }
   var right: XAxisItem { get set }
 }
@@ -18,7 +19,18 @@ public protocol XAxisEdgesProtocol {
 extension XAxisEdgesProtocol where XAxisItem: AdditiveArithmetic {
 
   public var horizontal: XAxisItem {
-    left + right
+    return left + right
+  }
+
+  public var withoutHorizontal: Self {
+    return withHorizontal(left: .zero, right: .zero)
+  }
+
+  public func withHorizontal(left: XAxisItem, right: XAxisItem) -> Self {
+    var copy = self
+    copy.left = left
+    copy.right = right
+    return copy
   }
 }
 
@@ -31,32 +43,38 @@ public struct XAxisEdges<XAxisItem>: XAxisEdgesProtocol {
     self.right = right
   }
 
-  @inlinable
   public var all: [XAxisItem] {
-    [left, right]
+    return [left, right]
   }
 }
 
 extension XAxisEdges: Equatable where XAxisItem: Equatable { }
+
 extension XAxisEdges: Hashable where XAxisItem: Hashable { }
+
 extension XAxisEdges: Decodable where XAxisItem: Decodable { }
+
 extension XAxisEdges: Encodable where XAxisItem: Encodable { }
 
 extension XAxisEdges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic {
 
-  @inlinable
   public static var zero: Self {
-    .init(left: .zero, right: .zero)
+    return .init(left: .zero, right: .zero)
   }
 
-  @inlinable
   public static func + (lhs: Self, rhs: Self) -> Self {
-    .init(left: lhs.left + rhs.left, right: lhs.right + rhs.right)
+    return .init(left: lhs.left + rhs.left, right: lhs.right + rhs.right)
   }
 
-  @inlinable
   public static func - (lhs: Self, rhs: Self) -> Self {
-    .init(left: lhs.left - rhs.left, right: lhs.right - rhs.right)
+    return .init(left: lhs.left - rhs.left, right: lhs.right - rhs.right)
+  }
+}
+
+extension XAxisEdges where XAxisItem: Numeric {
+
+  public static func * (lhs: Self, rhs: XAxisItem) -> Self {
+    return .init(left: lhs.left * rhs, right: lhs.right * rhs)
   }
 }
 

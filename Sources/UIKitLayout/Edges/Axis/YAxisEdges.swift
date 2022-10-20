@@ -8,9 +8,10 @@
 
 import Foundation
 
-public protocol YAxisEdgesProtocol {
+public protocol YAxisEdgesProtocol<YAxisItem> {
 
   associatedtype YAxisItem
+  
   var top: YAxisItem { get set }
   var bottom: YAxisItem { get set }
 }
@@ -18,7 +19,18 @@ public protocol YAxisEdgesProtocol {
 extension YAxisEdgesProtocol where YAxisItem: AdditiveArithmetic {
 
   public var vertical: YAxisItem {
-    top + bottom
+    return top + bottom
+  }
+
+  public var withoutVertical: Self {
+    return withVertical(top: .zero, bottom: .zero)
+  }
+
+  public func withVertical(top: YAxisItem, bottom: YAxisItem) -> Self {
+    var copy = self
+    copy.top = top
+    copy.bottom = bottom
+    return copy
   }
 }
 
@@ -31,32 +43,38 @@ public struct YAxisEdges<YAxisItem>: YAxisEdgesProtocol {
     self.bottom = bottom
   }
 
-  @inlinable
   public var all: [YAxisItem] {
-    [top, bottom]
+    return [top, bottom]
   }
 }
 
 extension YAxisEdges: Equatable where YAxisItem: Equatable { }
+
 extension YAxisEdges: Hashable where YAxisItem: Hashable { }
+
 extension YAxisEdges: Decodable where YAxisItem: Decodable { }
+
 extension YAxisEdges: Encodable where YAxisItem: Encodable { }
 
 extension YAxisEdges: AdditiveArithmetic where YAxisItem: AdditiveArithmetic {
 
-  @inlinable
   public static var zero: Self {
-    .init(top: .zero, bottom: .zero)
+    return .init(top: .zero, bottom: .zero)
   }
 
-  @inlinable
   public static func + (lhs: Self, rhs: Self) -> Self {
-    .init(top: lhs.top + rhs.top, bottom: lhs.bottom + rhs.bottom)
+    return .init(top: lhs.top + rhs.top, bottom: lhs.bottom + rhs.bottom)
   }
 
-  @inlinable
   public static func - (lhs: Self, rhs: Self) -> Self {
-    .init(top: lhs.top - rhs.top, bottom: lhs.bottom - rhs.bottom)
+    return .init(top: lhs.top - rhs.top, bottom: lhs.bottom - rhs.bottom)
+  }
+}
+
+extension YAxisEdges where YAxisItem: Numeric {
+
+  public static func * (lhs: Self, rhs: YAxisItem) -> Self {
+    return .init(top: lhs.top * rhs, bottom: lhs.bottom * rhs)
   }
 }
 

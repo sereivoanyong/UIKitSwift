@@ -8,26 +8,6 @@
 
 import UIKit
 
-// MARK: Layout Priority
-
-extension UILayoutPriority: ExpressibleByFloatLiteral {
-  
-  public typealias FloatLiteralType = Float
-  
-  public init(floatLiteral value: Float) {
-    self.init(rawValue: value)
-  }
-}
-
-extension UILayoutPriority: ExpressibleByIntegerLiteral {
-
-  public typealias IntegerLiteralType = Int
-
-  public init(integerLiteral value: Int) {
-    self.init(rawValue: Float(value))
-  }
-}
-
 // MARK: Axis Edges
 
 public typealias DirectionalXAxisEdgeInsets = DirectionalXAxisEdges<CGFloat>
@@ -41,7 +21,7 @@ public typealias DirectionalEdgeInsets = DirectionalEdges<CGFloat, CGFloat>
 extension DirectionalEdgesProtocol where DirectionalXAxisItem == NSLayoutConstraint, YAxisItem == NSLayoutConstraint {
 
   public var constants: DirectionalEdgeInsets {
-    get { map { $0.constant } }
+    get { return map { $0.constant } }
     set { set(newValue, at: \.constant) }
   }
 }
@@ -59,7 +39,7 @@ public typealias EdgeInsets = Edges<CGFloat, CGFloat>
 extension EdgesProtocol where XAxisItem == NSLayoutConstraint, YAxisItem == NSLayoutConstraint {
 
   public var constants: EdgeInsets {
-    get { map { $0.constant } }
+    get { return map { $0.constant } }
     set { set(newValue, at: \.constant) }
   }
 }
