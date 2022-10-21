@@ -8,17 +8,17 @@
 
 import Foundation
 
-public protocol DirectionalXAxisEdgesProtocol<DirectionalXAxisItem> {
+public protocol DirectionalXAxisEdgesProtocol<XAxisItem> {
 
-  associatedtype DirectionalXAxisItem
+  associatedtype XAxisItem
 
-  var leading: DirectionalXAxisItem { get set }
-  var trailing: DirectionalXAxisItem { get set }
+  var leading: XAxisItem { get set }
+  var trailing: XAxisItem { get set }
 }
 
-extension DirectionalXAxisEdgesProtocol where DirectionalXAxisItem: AdditiveArithmetic {
+extension DirectionalXAxisEdgesProtocol where XAxisItem: AdditiveArithmetic {
 
-  public var horizontal: DirectionalXAxisItem {
+  public var horizontal: XAxisItem {
     return leading + trailing
   }
 
@@ -26,7 +26,7 @@ extension DirectionalXAxisEdgesProtocol where DirectionalXAxisItem: AdditiveArit
     return withHorizontal(leading: .zero, trailing: .zero)
   }
 
-  public func withHorizontal(leading: DirectionalXAxisItem, trailing: DirectionalXAxisItem) -> Self {
+  public func withHorizontal(leading: XAxisItem, trailing: XAxisItem) -> Self {
     var copy = self
     copy.leading = leading
     copy.trailing = trailing
@@ -34,29 +34,29 @@ extension DirectionalXAxisEdgesProtocol where DirectionalXAxisItem: AdditiveArit
   }
 }
 
-public struct DirectionalXAxisEdges<DirectionalXAxisItem>: DirectionalXAxisEdgesProtocol {
+public struct DirectionalXAxisEdges<XAxisItem>: DirectionalXAxisEdgesProtocol {
 
-  public var leading, trailing: DirectionalXAxisItem
+  public var leading, trailing: XAxisItem
 
-  public init(leading: DirectionalXAxisItem, trailing: DirectionalXAxisItem) {
+  public init(leading: XAxisItem, trailing: XAxisItem) {
     self.leading = leading
     self.trailing = trailing
   }
 
-  public var all: [DirectionalXAxisItem] {
+  public var all: [XAxisItem] {
     return [leading, trailing]
   }
 }
 
-extension DirectionalXAxisEdges: Equatable where DirectionalXAxisItem: Equatable { }
+extension DirectionalXAxisEdges: Equatable where XAxisItem: Equatable { }
 
-extension DirectionalXAxisEdges: Hashable where DirectionalXAxisItem: Hashable { }
+extension DirectionalXAxisEdges: Hashable where XAxisItem: Hashable { }
 
-extension DirectionalXAxisEdges: Decodable where DirectionalXAxisItem: Decodable { }
+extension DirectionalXAxisEdges: Decodable where XAxisItem: Decodable { }
 
-extension DirectionalXAxisEdges: Encodable where DirectionalXAxisItem: Encodable { }
+extension DirectionalXAxisEdges: Encodable where XAxisItem: Encodable { }
 
-extension DirectionalXAxisEdges: AdditiveArithmetic where DirectionalXAxisItem: AdditiveArithmetic {
+extension DirectionalXAxisEdges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic {
 
   public static var zero: Self {
     return .init(leading: .zero, trailing: .zero)
@@ -71,9 +71,9 @@ extension DirectionalXAxisEdges: AdditiveArithmetic where DirectionalXAxisItem: 
   }
 }
 
-extension DirectionalXAxisEdges where DirectionalXAxisItem: Numeric {
+extension DirectionalXAxisEdges where XAxisItem: Numeric {
 
-  public static func * (lhs: Self, rhs: DirectionalXAxisItem) -> Self {
+  public static func * (lhs: Self, rhs: XAxisItem) -> Self {
     return .init(leading: lhs.leading * rhs, trailing: lhs.trailing * rhs)
   }
 }

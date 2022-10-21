@@ -8,17 +8,11 @@
 
 import UIKit
 
-// MARK: Axis Edges
-
-public typealias DirectionalXAxisEdgeInsets = DirectionalXAxisEdges<CGFloat>
-public typealias XAxisEdgeInsets = XAxisEdges<CGFloat>
-public typealias YAxisEdgeInsets = YAxisEdges<CGFloat>
-
 // MARK: Directional Edges
 
 public typealias DirectionalEdgeInsets = DirectionalEdges<CGFloat, CGFloat>
 
-extension DirectionalEdgesProtocol where DirectionalXAxisItem == NSLayoutConstraint, YAxisItem == NSLayoutConstraint {
+extension DirectionalEdgesProtocol where XAxisItem == NSLayoutConstraint, YAxisItem == NSLayoutConstraint {
 
   public var constants: DirectionalEdgeInsets {
     get { return map { $0.constant } }

@@ -8,21 +8,21 @@
 
 import Foundation
 
-public protocol DirectionalEdgesProtocol<DirectionalXAxisItem, YAxisItem>: DirectionalXAxisEdgesProtocol, YAxisEdgesProtocol {
+public protocol DirectionalEdgesProtocol<XAxisItem, YAxisItem>: DirectionalXAxisEdgesProtocol, YAxisEdgesProtocol {
 
-  init(top: YAxisItem, leading: DirectionalXAxisItem, bottom: YAxisItem, trailing: DirectionalXAxisItem)
+  init(top: YAxisItem, leading: XAxisItem, bottom: YAxisItem, trailing: XAxisItem)
 }
 
 extension DirectionalEdgesProtocol {
 
-  public init(horizontal: any DirectionalXAxisEdgesProtocol<DirectionalXAxisItem>, vertical: any YAxisEdgesProtocol<YAxisItem>) {
+  public init(horizontal: any DirectionalXAxisEdgesProtocol<XAxisItem>, vertical: any YAxisEdgesProtocol<YAxisItem>) {
     self.init(top: vertical.top, leading: horizontal.leading, bottom: vertical.bottom, trailing: horizontal.trailing)
   }
 }
 
-extension DirectionalEdgesProtocol where DirectionalXAxisItem == YAxisItem {
+extension DirectionalEdgesProtocol where XAxisItem == YAxisItem {
 
-  public typealias Item = DirectionalXAxisItem
+  public typealias Item = XAxisItem
 
   public var all: [Item] {
     return [top, leading, bottom, trailing]
@@ -52,7 +52,7 @@ extension DirectionalEdgesProtocol where DirectionalXAxisItem == YAxisItem {
   }
 }
 
-extension DirectionalEdgesProtocol where DirectionalXAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
+extension DirectionalEdgesProtocol where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
 
   public static var zero: Self {
     return .init(top: .zero, leading: .zero, bottom: .zero, trailing: .zero)
@@ -67,14 +67,14 @@ extension DirectionalEdgesProtocol where DirectionalXAxisItem: AdditiveArithmeti
   }
 }
 
-public struct DirectionalEdges<DirectionalXAxisItem, YAxisItem>: DirectionalEdgesProtocol {
+public struct DirectionalEdges<XAxisItem, YAxisItem>: DirectionalEdgesProtocol {
 
   public var top: YAxisItem
-  public var leading: DirectionalXAxisItem
+  public var leading: XAxisItem
   public var bottom: YAxisItem
-  public var trailing: DirectionalXAxisItem
+  public var trailing: XAxisItem
 
-  public init(top: YAxisItem, leading: DirectionalXAxisItem, bottom: YAxisItem, trailing: DirectionalXAxisItem) {
+  public init(top: YAxisItem, leading: XAxisItem, bottom: YAxisItem, trailing: XAxisItem) {
     self.top = top
     self.leading = leading
     self.bottom = bottom
@@ -82,14 +82,14 @@ public struct DirectionalEdges<DirectionalXAxisItem, YAxisItem>: DirectionalEdge
   }
 }
 
-extension DirectionalEdges: Equatable where DirectionalXAxisItem: Equatable, YAxisItem: Equatable { }
+extension DirectionalEdges: Equatable where XAxisItem: Equatable, YAxisItem: Equatable { }
 
-extension DirectionalEdges: Hashable where DirectionalXAxisItem: Hashable, YAxisItem: Hashable { }
+extension DirectionalEdges: Hashable where XAxisItem: Hashable, YAxisItem: Hashable { }
 
-extension DirectionalEdges: Decodable where DirectionalXAxisItem: Decodable, YAxisItem: Decodable { }
+extension DirectionalEdges: Decodable where XAxisItem: Decodable, YAxisItem: Decodable { }
 
-extension DirectionalEdges: Encodable where DirectionalXAxisItem: Encodable, YAxisItem: Encodable { }
+extension DirectionalEdges: Encodable where XAxisItem: Encodable, YAxisItem: Encodable { }
 
-extension DirectionalEdges: AdditiveArithmetic where DirectionalXAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic { }
+extension DirectionalEdges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic { }
 
 #endif
