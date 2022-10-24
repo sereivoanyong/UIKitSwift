@@ -4,8 +4,6 @@
 //  Created by Sereivoan Yong on 6/4/21.
 //
 
-#if os(iOS) && canImport(Foundation)
-
 import Foundation
 
 public protocol DirectionalXAxisEdgesProtocol<XAxisItem> {
@@ -43,8 +41,20 @@ public struct DirectionalXAxisEdges<XAxisItem>: DirectionalXAxisEdgesProtocol {
     self.trailing = trailing
   }
 
-  public var all: [XAxisItem] {
-    return [leading, trailing]
+  public init(_ item: XAxisItem) {
+    self.init(leading: item, trailing: item)
+  }
+
+  public init(_ items: any DirectionalXAxisEdgesProtocol<XAxisItem>) {
+    self.init(leading: items.leading, trailing: items.trailing)
+  }
+}
+
+extension DirectionalXAxisEdges: Sequence {
+
+  @inlinable
+  __consuming public func makeIterator() -> IndexingIterator<[XAxisItem]> {
+    return IndexingIterator<[XAxisItem]>(_elements: [leading, trailing])
   }
 }
 
@@ -59,7 +69,7 @@ extension DirectionalXAxisEdges: Encodable where XAxisItem: Encodable { }
 extension DirectionalXAxisEdges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic {
 
   public static var zero: Self {
-    return .init(leading: .zero, trailing: .zero)
+    return .init(.zero)
   }
 
   public static func + (lhs: Self, rhs: Self) -> Self {
@@ -77,5 +87,3 @@ extension DirectionalXAxisEdges where XAxisItem: Numeric {
     return .init(leading: lhs.leading * rhs, trailing: lhs.trailing * rhs)
   }
 }
-
-#endif

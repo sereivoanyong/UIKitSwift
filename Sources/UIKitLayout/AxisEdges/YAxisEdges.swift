@@ -4,8 +4,6 @@
 //  Created by Sereivoan Yong on 6/4/21.
 //
 
-#if os(iOS) && canImport(Foundation)
-
 import Foundation
 
 public protocol YAxisEdgesProtocol<YAxisItem> {
@@ -43,8 +41,20 @@ public struct YAxisEdges<YAxisItem>: YAxisEdgesProtocol {
     self.bottom = bottom
   }
 
-  public var all: [YAxisItem] {
-    return [top, bottom]
+  public init(_ item: YAxisItem) {
+    self.init(top: item, bottom: item)
+  }
+
+  public init(_ items: any YAxisEdgesProtocol<YAxisItem>) {
+    self.init(top: items.top, bottom: items.bottom)
+  }
+}
+
+extension YAxisEdges: Sequence {
+
+  @inlinable
+  __consuming public func makeIterator() -> IndexingIterator<[YAxisItem]> {
+    return IndexingIterator<[YAxisItem]>(_elements: [top, bottom])
   }
 }
 
@@ -59,7 +69,7 @@ extension YAxisEdges: Encodable where YAxisItem: Encodable { }
 extension YAxisEdges: AdditiveArithmetic where YAxisItem: AdditiveArithmetic {
 
   public static var zero: Self {
-    return .init(top: .zero, bottom: .zero)
+    return .init(.zero)
   }
 
   public static func + (lhs: Self, rhs: Self) -> Self {
@@ -77,5 +87,3 @@ extension YAxisEdges where YAxisItem: Numeric {
     return .init(top: lhs.top * rhs, bottom: lhs.bottom * rhs)
   }
 }
-
-#endif

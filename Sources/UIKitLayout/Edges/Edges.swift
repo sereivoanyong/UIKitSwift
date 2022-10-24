@@ -4,58 +4,56 @@
 //  Created by Sereivoan Yong on 5/29/21.
 //
 
-#if os(iOS) && canImport(Foundation)
-
 import Foundation
 
-public protocol EdgesProtocol<XAxisItem, YAxisItem>: XAxisEdgesProtocol, YAxisEdgesProtocol {
+public protocol EdgesProtocol<AxisItem>: XAxisEdgesProtocol, YAxisEdgesProtocol where AxisItem == XAxisItem, AxisItem == YAxisItem {
 
-  init(top: YAxisItem, left: XAxisItem, bottom: YAxisItem, right: XAxisItem)
+  associatedtype AxisItem
+
+  init(top: AxisItem, left: AxisItem, bottom: AxisItem, right: AxisItem)
 }
 
 extension EdgesProtocol {
 
-  public init(horizontal: any XAxisEdgesProtocol<XAxisItem>, vertical: any YAxisEdgesProtocol<YAxisItem>) {
-    self.init(top: vertical.top, left: horizontal.left, bottom: vertical.bottom, right: horizontal.right)
-  }
-}
-
-extension EdgesProtocol where XAxisItem == YAxisItem {
-
-  public typealias Item = XAxisItem
-
-  public var all: [Item] {
-    return [top, left, bottom, right]
+  public init(_ item: AxisItem) {
+    self.init(top: item, left: item, bottom: item, right: item)
   }
 
-  /// `let insets = Edges<NSLayoutConstraint>(...).map { $0.constant }`
-  public func map<T>(_ transform: (Item) -> T) -> Edges<T, T> {
+  public init(_ items: any EdgesProtocol<AxisItem>) {
+    self.init(top: items.top, left: items.left, bottom: items.bottom, right: items.right)
+  }
+
+  public func map<T>(_ transform: (AxisItem) -> T) -> Edges<T> {
     return .init(top: transform(top), left: transform(left), bottom: transform(bottom), right: transform(right))
   }
 
-  public mutating func set<T>(_ edges: any EdgesProtocol<T, T>, at keyPath: WritableKeyPath<Item, T>) {
+  public mutating func set<T>(_ edges: any EdgesProtocol<T>, at keyPath: WritableKeyPath<AxisItem, T>) {
     top[keyPath: keyPath] = edges.top
     left[keyPath: keyPath] = edges.left
     bottom[keyPath: keyPath] = edges.bottom
     right[keyPath: keyPath] = edges.right
   }
 
-  public mutating func update<T>(_ newEdges: any EdgesProtocol<T, T>, set: (inout Item, T) -> Void) {
-    set(&top, newEdges.top)
-    set(&left, newEdges.left)
-    set(&bottom, newEdges.bottom)
-    set(&right, newEdges.right)
-  }
-
-  public static func * (lhs: Self, rhs: Item) -> Self where Item: Numeric {
-    return .init(top: lhs.top * rhs, left: lhs.left * rhs, bottom: lhs.bottom * rhs, right: lhs.right * rhs)
+  public mutating func update<T>(with edges: any EdgesProtocol<T>, by set: (inout AxisItem, T) -> Void) {
+    set(&top, edges.top)
+    set(&left, edges.left)
+    set(&bottom, edges.bottom)
+    set(&right, edges.right)
   }
 }
 
-extension EdgesProtocol where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic {
+extension EdgesProtocol where AxisItem: AdditiveArithmetic {
+
+  public init(top: AxisItem, bottom: AxisItem) {
+    self.init(top: top, left: .zero, bottom: bottom, right: .zero)
+  }
+
+  public init(left: AxisItem, right: AxisItem) {
+    self.init(top: .zero, left: left, bottom: .zero, right: right)
+  }
 
   public static var zero: Self {
-    return .init(top: .zero, left: .zero, bottom: .zero, right: .zero)
+    return .init(.zero)
   }
 
   public static func + (lhs: Self, rhs: Self) -> Self {
@@ -67,7 +65,47 @@ extension EdgesProtocol where XAxisItem: AdditiveArithmetic, YAxisItem: Additive
   }
 }
 
-public struct Edges<XAxisItem, YAxisItem>: EdgesProtocol {
+extension EdgesProtocol where AxisItem: Numeric {
+
+  public static func * (lhs: Self, rhs: AxisItem) -> Self {
+    return .init(top: lhs.top * rhs, left: lhs.left * rhs, bottom: lhs.bottom * rhs, right: lhs.right * rhs)
+  }
+}
+
+public struct Edges<AxisItem>: EdgesProtocol {
+
+  public var top: AxisItem
+  public var left: AxisItem
+  public var bottom: AxisItem
+  public var right: AxisItem
+
+  public init(top: AxisItem, left: AxisItem, bottom: AxisItem, right: AxisItem) {
+    self.top = top
+    self.left = left
+    self.bottom = bottom
+    self.right = right
+  }
+}
+
+extension Edges: Sequence {
+
+  @inlinable
+  __consuming public func makeIterator() -> IndexingIterator<[AxisItem]> {
+    return IndexingIterator<[AxisItem]>(_elements: [top, left, bottom, right])
+  }
+}
+
+extension Edges: Equatable where AxisItem: Equatable { }
+
+extension Edges: Hashable where AxisItem: Hashable { }
+
+extension Edges: Decodable where AxisItem: Decodable { }
+
+extension Edges: Encodable where AxisItem: Encodable { }
+
+extension Edges: AdditiveArithmetic where AxisItem: AdditiveArithmetic { }
+
+public struct AxisEdges<XAxisItem, YAxisItem>: XAxisEdgesProtocol, YAxisEdgesProtocol {
 
   public var top: YAxisItem
   public var left: XAxisItem
@@ -80,16 +118,16 @@ public struct Edges<XAxisItem, YAxisItem>: EdgesProtocol {
     self.bottom = bottom
     self.right = right
   }
+
+  public init(xAxis: any XAxisEdgesProtocol<XAxisItem>, yAxis: any YAxisEdgesProtocol<YAxisItem>) {
+    self.init(top: yAxis.top, left: xAxis.left, bottom: yAxis.bottom, right: xAxis.right)
+  }
 }
 
-extension Edges: Equatable where XAxisItem: Equatable, YAxisItem: Equatable { }
+extension AxisEdges: Equatable where XAxisItem: Equatable, YAxisItem: Equatable { }
 
-extension Edges: Hashable where XAxisItem: Hashable, YAxisItem: Hashable { }
+extension AxisEdges: Hashable where XAxisItem: Hashable, YAxisItem: Hashable { }
 
-extension Edges: Decodable where XAxisItem: Decodable, YAxisItem: Decodable { }
+extension AxisEdges: Decodable where XAxisItem: Decodable, YAxisItem: Decodable { }
 
-extension Edges: Encodable where XAxisItem: Encodable, YAxisItem: Encodable { }
-
-extension Edges: AdditiveArithmetic where XAxisItem: AdditiveArithmetic, YAxisItem: AdditiveArithmetic { }
-
-#endif
+extension AxisEdges: Encodable where XAxisItem: Encodable, YAxisItem: Encodable { }
