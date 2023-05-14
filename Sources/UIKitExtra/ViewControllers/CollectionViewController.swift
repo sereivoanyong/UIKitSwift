@@ -76,15 +76,14 @@ open class CollectionViewController: UIViewController {
   }
 
   open var collectionViewIfLoaded: UICollectionView? {
-    _collectionView
+    return _collectionView
   }
 
   open func collectionViewDidLoad() {
-
   }
 
   open var isCollectionViewLoaded: Bool {
-    _collectionView != nil
+    return _collectionView != nil
   }
 
   // MARK: View Lifecycle

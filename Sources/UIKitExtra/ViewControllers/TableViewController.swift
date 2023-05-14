@@ -14,7 +14,43 @@ open class TableViewController: UIViewController {
 
   public let tableViewStyle: UITableView.Style
 
-  lazy open private(set) var tableView: UITableView = {
+  open var clearsSelectionOnViewWillAppear: Bool = true
+  open var endEditingOnViewWillDisappear: Bool = true
+  open var isTableViewRoot: Bool = false
+
+  public init(style: UITableView.Style = .plain) {
+    self.tableViewStyle = style
+    super.init(nibName: nil, bundle: nil)
+  }
+
+  public override init(nibName: String?, bundle: Bundle?) {
+    self.tableViewStyle = .plain
+    super.init(nibName: nibName, bundle: bundle)
+  }
+
+  public required init?(coder: NSCoder) {
+    self.tableViewStyle = .plain
+    super.init(coder: coder)
+  }
+
+  // MARK: Table View Lifecycle
+
+  private var _tableView: UITableView!
+  open var tableView: UITableView {
+    get {
+      if _tableView == nil {
+        loadTableView()
+        tableViewDidLoad()
+      }
+      return _tableView
+    }
+    set {
+      precondition(_tableView == nil, "Table view can only be set before it is loaded.")
+      _tableView = newValue
+    }
+  }
+
+  open func loadTableView() {
     let tableView = Self.tableViewClass.init(frame: UIScreen.main.bounds, style: tableViewStyle)
     switch tableViewStyle {
     case .grouped, .insetGrouped:
@@ -23,7 +59,6 @@ open class TableViewController: UIViewController {
       } else {
         tableView.backgroundColor = .groupTableViewBackground
       }
-
     default:
       if #available(iOS 13.0, *) {
         tableView.backgroundColor = .systemBackground
@@ -40,29 +75,26 @@ open class TableViewController: UIViewController {
     tableView.preservesSuperviewLayoutMargins = true
     tableView.dataSource = self as? UITableViewDataSource
     tableView.delegate = self as? UITableViewDelegate
-    if #available(iOS 10.0, *) {
-      tableView.prefetchDataSource = self as? UITableViewDataSourcePrefetching
-      if #available(iOS 11.0, *) {
-        tableView.dragDelegate = self as? UITableViewDragDelegate
-        tableView.dropDelegate = self as? UITableViewDropDelegate
-      }
+    tableView.prefetchDataSource = self as? UITableViewDataSourcePrefetching
+    if #available(iOS 11.0, *) {
+      tableView.dragDelegate = self as? UITableViewDragDelegate
+      tableView.dropDelegate = self as? UITableViewDropDelegate
     }
-    return tableView
-  }()
-
-  open var clearsSelectionOnViewWillAppear: Bool = true
-  open var endEditingOnViewWillDisappear: Bool = true
-  open var isTableViewRoot: Bool = false
-
-  public init(style: UITableView.Style = .plain) {
-    self.tableViewStyle = style
-    super.init(nibName: nil, bundle: nil)
+    self.tableView = tableView
   }
 
-  public required init?(coder: NSCoder) {
-    self.tableViewStyle = .plain
-    super.init(coder: coder)
+  open var tableViewIfLoaded: UITableView? {
+    return _tableView
   }
+
+  open func tableViewDidLoad() {
+  }
+
+  open var isTableViewLoaded: Bool {
+    return _tableView != nil
+  }
+
+  // MARK: View Lifecycle
 
   open override func loadView() {
     if isTableViewRoot {
@@ -78,7 +110,7 @@ open class TableViewController: UIViewController {
     if !isTableViewRoot {
       tableView.frame = view.bounds
       tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-      view.addSubview(tableView)
+      view.insertSubview(tableView, at: 0)
     }
   }
 
