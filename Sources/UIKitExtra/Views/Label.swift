@@ -25,6 +25,11 @@ extension Label {
     /// Optional color transformer that is used to resolve the color. A nil value means the `color` is used as-is.
     public var colorTransformer: ConfigurationColorTransformer?
 
+    public init(color: UIColor? = nil, colorTransformer: Label.ConfigurationColorTransformer? = nil) {
+      self.color = color
+      self.colorTransformer = colorTransformer
+    }
+
     public func resolvedColor(for tintColor: UIColor) -> UIColor {
       if let color = color {
         return colorTransformer?.transform(color) ?? color
@@ -41,6 +46,11 @@ extension Label {
 
     /// Optional color transformer that is used to resolve the background color. A nil value means the `backgroundColor` is used as-is.
     public var backgroundColorTransformer: ConfigurationColorTransformer?
+
+    public init(backgroundColor: UIColor? = nil, backgroundColorTransformer: Label.ConfigurationColorTransformer? = nil) {
+      self.backgroundColor = backgroundColor
+      self.backgroundColorTransformer = backgroundColorTransformer
+    }
 
     public func resolvedBackgroundColor(for tintColor: UIColor) -> UIColor {
       if let backgroundColor = backgroundColor {
